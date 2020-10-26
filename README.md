@@ -4,11 +4,11 @@ Compute the smallest bounding ball of a point cloud in arbitrary dimensions. A P
 
 The code is provided under the LGPLv3 license.
 
-For an implementation in pure Python, see [`miniball`](https://pypi.org/project/miniball/). `cyminiball` can be used as a drop-in replacement. It runs much faster because it is based on an effcient C++ implementation.
+For an implementation in pure Python, see [`miniball`](https://pypi.org/project/miniball/). `cyminiball` can be used as a drop-in replacement for `miniball`; it runs much faster because it is based on an effcient C++ implementation.
 
 ### Installation:
 
-    pip install miniball-wrap
+    pip install cyminiball
 
 ### Usage:
 
@@ -41,4 +41,5 @@ cd cyminiball
 python setup.py build_ext --inplace
 python setup.py sdist bdist_wheel
 python test/run_tests.py
+python test/example.py
 ```
