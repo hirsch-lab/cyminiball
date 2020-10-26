@@ -1,0 +1,9 @@
+include bindings/*.hpp
+include bindings/*.cpp
+include setup.py
+include MANIFEST.in
+include LICENSE
+include README.md
+
+graft test
+graft miniball
