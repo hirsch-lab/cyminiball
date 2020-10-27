@@ -35,7 +35,7 @@ with open("README.md", encoding="utf-8") as fid:
     long_description = fid.read()
 
 setup(name="cyminiball",
-      version="0.0.1",
+      version="1.0.0",
       url="https://github.com/hirsch-lab/cyminiball",
       author="Norman Juchler",
       author_email="normanius@gmail.com",
