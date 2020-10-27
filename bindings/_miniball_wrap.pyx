@@ -33,9 +33,8 @@ cdef extern from "_miniball_wrap.hpp" nogil:
     bool _compute_miniball[T](T** points, size_t n_points,
                               T* center, size_t n_dims, T& r2)
     bool _compute_miniball_extended[T](T** points, size_t n_points,
-                                       T* center, size_t n_dims,
-                                       T& r2, T& d2_max,
-                                       int& id0_max, int& id1_max,
+                                       T* center, size_t n_dims, T& r2,
+                                       int* support_ids, int& n_support,
                                        T& suboptimality, T& relative_error,
                                        T& elapsed)
 
@@ -60,9 +59,7 @@ def _compute_float(float_type[:,:] points not None, bool details):
     center = np.zeros(points.shape[1], dtype=dtype)
     cdef float_type[:] center_view = center
     cdef float_type r2 = 0.
-    cdef float_type d2_max = 0.
-    cdef int id0_max = -1
-    cdef int id1_max = -1
+    cdef int n_support = 0
     cdef float_type suboptimality = 0.
     cdef float_type relative_error = 0.
     cdef float_type elapsed = 0.
@@ -84,30 +81,38 @@ def _compute_float(float_type[:,:] points not None, bool details):
     # Cython cares nicely about strides. So far I didn't encounter any
     # problems with non-contiguity/slices.
     cdef float_type[:,::1] points_view = np.ascontiguousarray(points, dtype=dtype)
+
     #cdef float_type[:,:] points_view = np.asarray(points, dtype=dtype)
-    cdef size_t n_bytes = points_view.shape[0] * sizeof(float_type*)
+    cdef Py_ssize_t n_dims = points_view.shape[1]
+    cdef Py_ssize_t n_points = points_view.shape[0]
+    cdef size_t n_bytes = n_points * sizeof(float_type*)
+    cdef size_t n_bytes_ids = n_dims * sizeof(int)
+
     #cdef const float_type** point_ptrs = <const float_type **>PyMem_Malloc(n_bytes)
     cdef float_type** point_ptrs = <float_type **>PyMem_Malloc(n_bytes)
+
+    # Result container.
+    support_ids = np.empty(n_dims+1, dtype=np.int32)
+    cdef int[:] support_ids_view = support_ids
 
     if not point_ptrs:
         raise MemoryError
     try:
-        for i in range(points_view.shape[0]):
+        for i in range(n_points):
             point_ptrs[i] = &points_view[i, 0]
         if details:
             # Compute miniball with extended output, at the cost of some
             # overhead (measured ~10% for large and medium size problems).
             is_valid = _compute_miniball_extended(
-                point_ptrs, points_view.shape[0],
-                &center_view[0], points_view.shape[1],
-                r2, d2_max, id0_max, id1_max,
+                point_ptrs, n_points,
+                &center_view[0], n_dims, r2,
+                &support_ids_view[0], n_support,
                 suboptimality, relative_error,
                 elapsed)
         else:
             # Compute miniball with basic output: center and squared radius.
-            is_valid = _compute_miniball(
-                point_ptrs, points_view.shape[0],
-                &center_view[0], points_view.shape[1], r2)
+            is_valid = _compute_miniball(point_ptrs, n_points,
+                                         &center_view[0], n_dims, r2)
         if not is_valid:
             msg = "Encountered a problem when computing the miniball."
             raise MiniballError(msg)
@@ -116,15 +121,14 @@ def _compute_float(float_type[:,:] points not None, bool details):
     stop = time.time()
     if np.isnan(center).all():
         center = None
-        r2 = d2_max = np.nan
+        r2 = np.nan
         is_valid = False
     if details:
-        id_max = [id0_max, id1_max]
-        id_max = None if not is_valid else id_max
+        support_ids = support_ids[:n_support]
         dct = { "center": center,
                 "r2": r2,
-                "d2_max": d2_max,
-                "id_max": id_max,
+                "support": support_ids,
+                "n_support": n_support,
                 "relative_error": relative_error,
                 "suboptimality": suboptimality,
                 "is_valid": is_valid,
@@ -151,8 +155,10 @@ def compute(points, details=False):
     The code runs the popular and fast miniball algorithm by
     `Bernd Gärtner <https://people.inf.ethz.ch/gaertner/subdir/software/miniball.html>`_.
 
-    Returns a tuple (c, r2) with the center c and the squared radius r2 of
-    the miniball.
+    If details is False, a tuple (c, r2) is returned with the center c and
+    the squared radius r2 of the miniball. If details is True, (c, r2, det)
+    is returned, where det is a dictionary containing additional details about
+    the bounding sphere.
     """
     ret_default = (None, 0, None) if details else (None, 0)
     if points is None:
@@ -193,7 +199,6 @@ def compute(points, details=False):
         msg = "Expecting a 2D array but received a %dD array (shape: %s)."
         raise MiniballTypeError(msg % (len(points.shape), points.shape))
     return compute_no_checks(points, details)
-
 
 ################################################################################
 def get_bounding_ball(points):
