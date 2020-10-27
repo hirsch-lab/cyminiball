@@ -207,3 +207,19 @@ def get_bounding_ball(points):
     `miniball project <https://pypi.org/project/miniball/>`__ available on PyPi
     """
     return compute(points)
+
+################################################################################
+def compute_max_chord(details, points):
+    """
+    Compute the longest chord between the support points of the miniball.
+    This requires the detailed result dictionary by compute():
+        _, _, detailed = compute(..., detailed=True)
+    """
+    points = np.asarray(points)
+    support = points[details["support"]]
+    pdist = np.linalg.norm(support[:,None,:] - support[None,:,:], axis=-1)
+    ids_max = list(np.unravel_index(np.argmax(pdist, axis=None), pdist.shape))
+    details["ids_max"] = details["support"][ids_max]
+    details["d_max"] = pdist[ids_max]
+    return details
+
