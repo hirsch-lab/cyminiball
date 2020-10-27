@@ -35,7 +35,7 @@ else:
 with open("README.md", encoding="utf-8") as fid:
     long_description = fid.read()
 
-setup(name="miniball-wrap",
+setup(name="cyminiball",
       version="0.0.1",
       url="https://github.com/hirsch-lab/cyminiball",
       author="Norman Juchler",
@@ -62,5 +62,5 @@ setup(name="miniball-wrap",
             "Intended Audience :: Developers",
             "Intended Audience :: Science/Research",
       ],
-      #setup_requires=["flake8"]
+      # setup_requires=["flake8"]
       )
