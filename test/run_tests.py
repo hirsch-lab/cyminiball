@@ -45,22 +45,22 @@ class TestTypes(unittest.TestCase):
         self.assertEqual(r2Ret, r2Ref)
         if self.detailed:
             self.assertEqual(len(ret), 3)
-            details = ret[2]
+            info = ret[2]
             if cRef is not None:
-                np.testing.assert_array_equal(details["center"], cRef)
-                self.assertEqual(details["r2"], r2Ref)
+                np.testing.assert_array_equal(info["center"], cRef)
+                self.assertEqual(info["radius"], np.sqrt(r2Ref))
             else:
-                self.assertIsNone(details)
+                self.assertIsNone(info)
 
     def checkRetCC(self, ret, ref):
         # Handles also nans.
         #self.assertEqual(ret[:2], ref[:2])
         np.testing.assert_equal(ret[:2], ref[:2])
         if self.detailed:
-            details = ret[2]
-            detailsRef = ref[2]
-            if details is not None:
-                self.assertSubset(details, detailsRef)
+            info = ret[2]
+            infoRef = ref[2]
+            if info is not None:
+                self.assertSubset(info, infoRef)
 
     def assertSubset(self, dictRet, dictRef):
         dictRet = {k:v for k,v in dictRef.items() if k in dictRet}
@@ -143,13 +143,13 @@ class TestTypes(unittest.TestCase):
                                    details=self.detailed), ret)
         # Scalar; is treated as one 1D point [42].
         d = 42
-        ret = ([42], 0, dict(center=42, r2=0, n_support=1, support=[0]))
+        ret = ([42], 0, dict(center=42, radius=0, n_support=1, support=[0]))
         self.checkRetCC(mb.compute(d, details=self.detailed), ret)
         self.checkRetCC(mb.compute(np.array(d, dtype=int),
                                    details=self.detailed), ret)
         # 1D array; is treated as a list of 1D points.
         d = [1,2,4,5]
-        ret = ([3], 4, dict(center=3, r2=4, n_support=2, support=[0,3]))
+        ret = ([3], 4, dict(center=3, radius=4, n_support=2, support=[0,3]))
         self.checkRetCC(mb.compute(d, details=self.detailed), ret)
         self.checkRetCC(mb.compute(np.array(d, dtype=int),
                                    details=self.detailed), ret)
@@ -202,7 +202,7 @@ class TestRandom(unittest.TestCase):
                     size = (n, d) if d else (n,)
                     data = self.rs.normal(0,1,size)
                     C_A, r2_A = mb.compute(data, details=False)
-                    C_B, r2_B, details_B = mb.compute(data, details=True)
+                    C_B, r2_B, info_B = mb.compute(data, details=True)
                     np.testing.assert_array_equal(C_A, C_B)
                     self.assertEqual(r2_A, r2_B)
 

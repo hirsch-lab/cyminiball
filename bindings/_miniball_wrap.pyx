@@ -125,17 +125,17 @@ def _compute_float(float_type[:,:] points not None, bool details):
         is_valid = False
     if details:
         support_ids = support_ids[:n_support]
-        dct = { "center": center,
-                "r2": r2,
-                "support": support_ids,
-                "n_support": n_support,
-                "relative_error": relative_error,
-                "suboptimality": suboptimality,
-                "is_valid": is_valid,
-                "elapsed": elapsed,
-                #"elapsed_all": stop-start
-              }
-        ret = (center, r2, dct)
+        info = { "center": center,
+                 "radius": np.sqrt(r2),
+                 "support": support_ids,
+                 "n_support": n_support,
+                 "relative_error": relative_error,
+                 "suboptimality": suboptimality,
+                 "is_valid": is_valid,
+                 "elapsed": elapsed,
+                 #"elapsed_all": stop-start
+               }
+        ret = (center, r2, info)
     else:
         ret = (center, r2)
     #print(stop-start)
@@ -143,22 +143,37 @@ def _compute_float(float_type[:,:] points not None, bool details):
 
 ################################################################################
 def compute_no_checks(points, details=False):
-    """Compute the bounding ball without any checks. Otherwise equivalent to
-    :ref:`~miniball.compute`.
+    """Compute the minimal bounding ball without any checks. Otherwise
+    equivalent to miniball.compute().
     """
     return _compute_float(points, details)
 
 
 ################################################################################
 def compute(points, details=False):
-    """Compute the bounding ball for a set of points with arbitrary dimensions.
-    The code runs the popular and fast miniball algorithm by
-    `Bernd Gärtner <https://people.inf.ethz.ch/gaertner/subdir/software/miniball.html>`_.
+    """Compute the minimal bounding ball for a set of points with arbitrary
+    dimensions. The code runs the popular and efficient miniball algorithm
+    by Bernd Gärtner [1].
 
-    If details is False, a tuple (c, r2) is returned with the center c and
-    the squared radius r2 of the miniball. If details is True, (c, r2, det)
-    is returned, where det is a dictionary containing additional details about
-    the bounding sphere.
+    [1] https://people.inf.ethz.ch/gaertner/subdir/software/miniball.html
+
+    Args:
+        points: Data array of shape (n,d) containing n points in d dimensions.
+        details: Enable additional output about the miniball. Default: False
+
+    Returns:
+        A tuple (c, r2) with the center c and  the squared radius r2 of the
+        miniball. If details is True, a tuple (c, r2, info), where info is a
+        dictionary with the following keys:
+
+            center: center of the miniball
+            radius: radius of the miniball
+            support: indices of the points that define the miniball
+            relative_error: numerical error measure
+            is_valid: flag indicating the numerical validity of the miniball
+            elapsed: time elapsed for the computation
+
+        See the code documentation in [1] for further details.
     """
     ret_default = (None, 0, None) if details else (None, 0)
     if points is None:
@@ -202,24 +217,37 @@ def compute(points, details=False):
 
 ################################################################################
 def get_bounding_ball(points):
-    """A synonym for :func:`~miniball.compute` with the purpose to make this
-    package a drop-in replacement for another
-    `miniball project <https://pypi.org/project/miniball/>`__ available on PyPi
+    """An alias for miniball.compute() with the purpose to make the
+    cyminiball package a drop-in replacement for another miniball project
+    available on PyPi: https://pypi.org/project/miniball/
     """
-    return compute(points)
+    return compute(points, details=False)
 
 ################################################################################
-def compute_max_chord(details, points):
+def compute_max_chord(points, info=None):
+    """Compute the longest chord between the support points of the miniball.
+    If info is None, compute(points, details=True) will be called internally:
+
+        # Alternative A:
+        info = compute_max_chord(points)
+        # Alternative B:
+        _, _, info = compute(..., detailed=True)
+        info = compute_max_chord(points=points, info=info)
+
+    Extends the info dictionary (in-place) by the following keys:
+
+        ids_max: ids of the points forming the maximum chord
+        d_max: length of the maximum chord
     """
-    Compute the longest chord between the support points of the miniball.
-    This requires the detailed result dictionary by compute():
-        _, _, detailed = compute(..., detailed=True)
-    """
+    if points is None:
+        raise MiniballError("Argument points cannot be None")
+    if info is None:
+        _, _, info = compute(points=points, details=True)
     points = np.asarray(points)
-    support = points[details["support"]]
+    support = points[info["support"]]
     pdist = np.linalg.norm(support[:,None,:] - support[None,:,:], axis=-1)
     ids_max = list(np.unravel_index(np.argmax(pdist, axis=None), pdist.shape))
-    details["ids_max"] = details["support"][ids_max]
-    details["d_max"] = pdist[ids_max]
-    return details
+    info["ids_max"] = info["support"][ids_max]
+    info["d_max"] = pdist[ids_max]
+    return info
 

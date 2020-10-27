@@ -30,21 +30,21 @@ print("Radius:", np.sqrt(r2))
 Additional output can be generated using the `details` flag and `compute_max_chord()`.
 
 ```python 
-C, r2, details = miniball.compute(points, details=True)
-# details is a dict with the following fields:
+C, r2, info = miniball.compute(points, details=True)
+# Returns an info dict with the following keys:
 #       center:         center 
-#       r2:             squared radius 
-#       support:        indices of the support
+#       radius:         radius
+#       support:        indices of the support points
 #       relative_error: numerical error measure
-#       is_valid:       valid result
+#       is_valid:       numerical validity
 #       elapsed:        time required 
 
 # The maximal chord is the longest line connecting any
 # two of the support points. The folowing extends the 
-# dict by:
+# info dict by the following keys:
 #       ids_max:        ids of the two extreme points
 #       d_max:          length of the maximal chord
-details = compute_max_chord(details, points)
+info = compute_max_chord(points, info=info)
 ```
 
 ### Build
