@@ -1,4 +1,3 @@
-import context
 import miniball
 import numpy as np
 from pprint import pprint

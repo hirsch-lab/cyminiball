@@ -1,7 +1,6 @@
-from context import miniball as mb
-
 import unittest
 import numpy as np
+from context import miniball as mb
 
 class TestTypes(unittest.TestCase):
     valid_ftypes = {
@@ -184,6 +183,7 @@ class TestTypes(unittest.TestCase):
         self.checkRetCC(mb.compute(np.array(d),
                                    details=self.detailed), ret)
 
+################################################################################
 class TestTypesDetailed(TestTypes):
     detailed = True
 
