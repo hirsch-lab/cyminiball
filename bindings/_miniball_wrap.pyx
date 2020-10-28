@@ -248,6 +248,6 @@ def compute_max_chord(points, info=None):
     pdist = np.linalg.norm(support[:,None,:] - support[None,:,:], axis=-1)
     ids_max = list(np.unravel_index(np.argmax(pdist, axis=None), pdist.shape))
     info["ids_max"] = info["support"][ids_max]
-    info["d_max"] = pdist[ids_max]
+    info["d_max"] = pdist[tuple(ids_max)]
     return info
 
