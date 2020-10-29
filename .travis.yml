@@ -1,18 +1,18 @@
 sudo: false
 language: python
 python:
-  - "3.5"
+  #- "3.5"
   - "3.6"
-  - "3.7"
-  - "3.8"
-  - "3.9"
-  - "pypy3"
+  #- "3.7"
+  #- "3.8"
+  #- "3.9"
+  #- "pypy3"
 # command to install dependencies
 install:
-before_script:
   - pip install tox-travis
+  - python setup.py build_ext --inplace
   #- pip install coveralls
 # command to run tests
 script:
-  - tox
+  - tox -vv
 #after_success: coveralls

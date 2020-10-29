@@ -5,5 +5,9 @@ include MANIFEST.in
 include LICENSE
 include README.md
 
-graft test
+graft examples
+graft tests
 graft miniball
+
+exclude **/.DS_Store
+exclude **/__pycache__/**
