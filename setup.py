@@ -25,11 +25,11 @@ if subcommand == "build_ext":
     import Cython.Compiler.Options
     Cython.Compiler.Options.annotate = True
     # Cython src.
-    miniball_src = "bindings/_miniball_wrap.pyx"
+    miniball_src = ["bindings/_miniball_wrap.pyx"]
     cmdclass["build_ext"] = build_ext
 else:
     # This uses the "pre-compiled" Cython output.
-    miniball_src = "bindings/_miniball_wrap.cpp"
+    miniball_src = ["bindings/_miniball_wrap.cpp"]
 
 with open("README.md", encoding="utf-8") as fid:
     long_description = fid.read()
@@ -48,7 +48,7 @@ setup(name="cyminiball",
       cmdclass=cmdclass,
       install_requires=["numpy"],
       ext_modules=[Extension("miniball",
-                             sources=[miniball_src],
+                             sources=miniball_src,
                              include_dirs=[numpy.get_include(), "."],
                              language="c++",
                              extra_compile_args=["-std=c++11"])],
