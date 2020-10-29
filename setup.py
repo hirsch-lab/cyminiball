@@ -1,5 +1,6 @@
 import sys
 import numpy
+from pathlib import Path
 from setuptools import setup, Extension
 
 # Useful commands:
@@ -31,6 +32,9 @@ else:
     # This uses the "pre-compiled" Cython output.
     miniball_src = ["bindings/_miniball_wrap.cpp"]
 
+include_dirs = [Path(__file__).parent.absolute(),
+                numpy.get_include()]
+
 with open("README.md", encoding="utf-8") as fid:
     long_description = fid.read()
 
@@ -49,7 +53,7 @@ setup(name="cyminiball",
       install_requires=["numpy"],
       ext_modules=[Extension("miniball",
                              sources=miniball_src,
-                             include_dirs=[numpy.get_include(), "."],
+                             include_dirs=include_dirs,
                              language="c++",
                              extra_compile_args=["-std=c++11"])],
       classifiers=[
