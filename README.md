@@ -1,5 +1,16 @@
 # cyminiball
 
+<!--https://raw.githubusercontent.com/yngvem/group-lasso/master/README.rst-->
+
+<!--[![Downloads](https://pepy.tech/badge/cyminiball)](https://pepy.tech/project/cyminiball)-->
+<!--https://pypistats.org/packages/cyminiball-->
+[![image](https://img.shields.io/pypi/v/cyminiball.svg)](https://pypi.org/project/cyminiball/)
+[![License](https://img.shields.io/pypi/l/cyminiball)](https://github.com/hirsch-lab/cyminiball/blob/main/LICENSE)
+[![CodeFactor](https://www.codefactor.io/repository/github/hirsch-lab/cyminiball/badge)](https://www.codefactor.io/repository/github/hirsch-lab/cyminiball)
+<!--Travis build and test-->
+<!--Coveralls.io-->
+<!--Read-the-docs not required for such a small project-->
+
 Compute the smallest bounding ball of a point cloud in arbitrary dimensions. A Python/Cython binding of the popular [miniball](https://people.inf.ethz.ch/gaertner/subdir/software/miniball.html) utility by Bernd Gärtner.
 
 The code is provided under the LGPLv3 license.
@@ -35,9 +46,16 @@ C, r2, info = miniball.compute(points, details=True)
 #       center:         center 
 #       radius:         radius
 #       support:        indices of the support points
-#       relative_error: numerical error measure
+#       relative_error: error measure realtive to r2
 #       is_valid:       numerical validity
 #       elapsed:        time required 
+#
+# Note that is_valid is based on a rather conservative 
+# numerical assessment. For practical applications,
+# examine relative_error directly. It represents the
+# relative difference of the max. squared distance of
+# all points from the ball center and r2 of the miniball. 
+# The value is ideally 0 and usually very small.
 
 # The maximal chord is the longest line connecting any
 # two of the support points. The folowing extends the 
@@ -46,6 +64,8 @@ C, r2, info = miniball.compute(points, details=True)
 #       d_max:          length of the maximal chord
 info = compute_max_chord(points, info=info)
 ```
+
+See [examples/examples.py](https://github.com/hirsch-lab/cyminiball) for further usage examples
 
 ### Build
 
@@ -60,6 +80,6 @@ git clone https://github.com/hirsch-lab/cyminiball.git
 cd cyminiball
 python setup.py build_ext --inplace
 python setup.py sdist bdist_wheel
-python test/run_tests.py
-python test/example.py
+python test/test_all.py
+python examples/examples.py
 ```

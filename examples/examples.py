@@ -63,7 +63,7 @@ def example_animated():
 
     # Set up animation.
     fig, ax = plt.subplots()
-    visualize_data(ax, points, lim=7)
+    visualize_data(ax, points[:-1], lim=7)
     _, _, info = miniball.compute(points, details=True)
     center, line, circle = visualize_circle(ax, info, points)
     circle = circle         # Circle artist
