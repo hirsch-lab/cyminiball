@@ -12,28 +12,31 @@ def generate_data(n=50):
     points = points.astype(dt)
     return points
 
+
 ################################################################################
 def visualize_data(ax, points, lim=5):
-    ax.plot(points[:,0], points[:,1], "kx")
+    ax.plot(points[:, 0], points[:, 1], "kx")
     ax.axis("square")
     ax.grid("on")
     ax.set_xlim([-lim, lim])
     ax.set_ylim([-lim, lim])
     ax.set_title("miniball example")
 
+
 ################################################################################
 def visualize_circle(ax, info, points):
     radius = info["radius"]
     center = info["center"]
     hp = ax.plot(center[0], center[1], "ob-")
-    hl = ax.plot(points[info["support"],0],
-                 points[info["support"],1], "ro-")
+    hl = ax.plot(points[info["support"], 0],
+                 points[info["support"], 1], "ro-")
     hc = plt.Circle(center, radius, fill=False, color="blue")
     ax.add_artist(hc)
     if "ids_max" in info:
-        hm = ax.plot(points[info["ids_max"],0],
-                     points[info["ids_max"],1], "mo-")
+        hm = ax.plot(points[info["ids_max"], 0],
+                     points[info["ids_max"], 1], "mo-")
     return hp, hl, hc
+
 
 ################################################################################
 def example_basic():
@@ -53,6 +56,7 @@ def example_basic():
     visualize_data(ax, points)
     visualize_circle(ax, info, points)
 
+
 ################################################################################
 def example_animated():
     # Data.
@@ -62,14 +66,14 @@ def example_animated():
     xrange = np.linspace(-4, 4, 120)
 
     # Set up animation.
-    fig, ax = plt.subplots()
+    _, ax = plt.subplots()
     visualize_data(ax, points[:-1], lim=7)
     _, _, info = miniball.compute(points, details=True)
     center, line, circle = visualize_circle(ax, info, points)
-    circle = circle         # Circle artist
+    #circle = circle        # Circle artist
     center = center[0]      # Line2D artist
     line = line[0]          # Line2D artist
-    point = ax.plot(0,0, 'gx-')[0] # line2D artist
+    point = ax.plot(0, 0, 'gx-')[0]  # line2D artist
     ax.legend((center, line, point),
               ("bounding circle", "support", "moving point"))
 
@@ -78,21 +82,21 @@ def example_animated():
 
     def update(x):
         # Update x coordinate of last point.
-        points[-1,0] = x
+        points[-1, 0] = x
         # Re-compute miniball.
         C, r2, info = miniball.compute(points, details=True)
         # Update artists.
         circle.center = C
         circle.radius = np.sqrt(r2)
         center.set_data(C)
-        line.set_data(points[info["support"],:].T)
-        point.set_data([[xrange[0], points[-1,0]],
-                        [points[-1,1], points[-1,1]]])
+        line.set_data(points[info["support"], :].T)
+        point.set_data([[xrange[0], points[-1, 0]],
+                        [points[-1, 1], points[-1, 1]]])
         return circle, center, line, point
 
     from matplotlib.animation import FuncAnimation
-    ani = FuncAnimation(fig, update, frames=xrange, interval=30,
-                        init_func=init, blit=True)
+    FuncAnimation(fig, update, frames=xrange, interval=30,
+                  init_func=init, blit=True)
 
 ################################################################################
 if __name__ == "__main__":
