@@ -33,8 +33,8 @@ def visualize_circle(ax, info, points):
     hc = plt.Circle(center, radius, fill=False, color="blue")
     ax.add_artist(hc)
     if "ids_max" in info:
-        hm = ax.plot(points[info["ids_max"], 0],
-                     points[info["ids_max"], 1], "mo-")
+        ax.plot(points[info["ids_max"], 0],
+                points[info["ids_max"], 1], "mo-")
     return hp, hl, hc
 
 
@@ -52,7 +52,7 @@ def example_basic():
     pprint(info, indent=4)
 
     # Visualize.
-    fig, ax = plt.subplots()
+    _, ax = plt.subplots()
     visualize_data(ax, points)
     visualize_circle(ax, info, points)
 
@@ -66,7 +66,7 @@ def example_animated():
     xrange = np.linspace(-4, 4, 120)
 
     # Set up animation.
-    _, ax = plt.subplots()
+    fig, ax = plt.subplots()
     visualize_data(ax, points[:-1], lim=7)
     _, _, info = miniball.compute(points, details=True)
     center, line, circle = visualize_circle(ax, info, points)

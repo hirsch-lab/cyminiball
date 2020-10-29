@@ -30,71 +30,71 @@ class TestTypes(unittest.TestCase):
     iterables = [list, tuple, set]
     detailed = False
 
-    def checkRet(self, ret, ref, dtype):
-        cRef, r2Ref = ref
-        cRet, r2Ret = ret[0:2]
+    def check_ret(self, ret, ref, dtype):
+        c_ref, r2_ref = ref
+        c_ret, r2_ret = ret[0:2]
         # Strangely, this is always float, independent of the requested dtype.
         # TODO: Check why.
-        self.assertTrue(issubclass(type(r2Ret), float))
-        self.assertEqual(cRet.dtype, dtype)
-        if cRef is not None:
-            np.testing.assert_array_equal(cRet, cRef)
+        self.assertTrue(issubclass(type(r2_ret), float))
+        self.assertEqual(c_ret.dtype, dtype)
+        if c_ref is not None:
+            np.testing.assert_array_equal(c_ret, c_ref)
         else:
-            self.assertIsNone(cRet)
-        self.assertEqual(r2Ret, r2Ref)
+            self.assertIsNone(c_ret)
+        self.assertEqual(r2_ret, r2_ref)
         if self.detailed:
             self.assertEqual(len(ret), 3)
             info = ret[2]
-            if cRef is not None:
-                np.testing.assert_array_equal(info["center"], cRef)
-                self.assertEqual(info["radius"], np.sqrt(r2Ref))
+            if c_ref is not None:
+                np.testing.assert_array_equal(info["center"], c_ref)
+                self.assertEqual(info["radius"], np.sqrt(r2_ref))
             else:
                 self.assertIsNone(info)
 
-    def checkRetCC(self, ret, ref):
+    def check_ret_cc(self, ret, ref):
         # Handles also nans.
         # self.assertEqual(ret[:2], ref[:2])
         np.testing.assert_equal(ret[:2], ref[:2])
         if self.detailed:
             info = ret[2]
-            infoRef = ref[2]
+            info_ref = ref[2]
             if info is not None:
-                self.assertSubset(info, infoRef)
+                self.assertSubset(info, info_ref)
 
-    def assertSubset(self, dictRet, dictRef):
-        dictRet = {k: v for k, v in dictRef.items() if k in dictRet}
-        self.assertEqual(dictRet, dictRef)
+    def assertSubset(self, dict_ret, dict_ref):
+        dict_ret = {k: v for k, v in dict_ref.items() if k in dict_ret}
+        self.assertEqual(dict_ret, dict_ref)
 
-    def convertData(data, dtype):
+    def convertData(self, data, dtype):
         return [list(map(dtype, elm)) for elm in data]
 
     def testNumpyTypes(self):
         # All values positive because of unsigned int tests.
-        dataIn = [[7., 7.], [2., 6.], [1., 1.], [3., 0.]]
+        data_in = [[7., 7.], [2., 6.], [1., 1.], [3., 0.]]
         ref = ([4., 4.], 18.0)
         dtypes = {**self.valid_ftypes, **self.valid_itypes}
         for dt, dt_ret in dtypes.items():
             with self.subTest(dt=dt):
-                data = self.convertData(dataIn, dt)
+                data = self.convertData(data_in, dt)
                 ret = mb.compute(data, details=self.detailed)
-                self.checkRet(ret, ref, dtype=dt_ret)
+                self.check_ret(ret, ref, dtype=dt_ret)
                 ret = mb.compute(np.array(data, dtype=dt),
                                  details=self.detailed)
-                self.checkRet(ret, ref, dtype=dt_ret)
+                self.check_ret(ret, ref, dtype=dt_ret)
 
     def testNumpyTypesNaN(self):
         # Points containing np.nan are skipped.
         # All values positive because of unsigned int tests.
-        dataIn = [[7., np.nan], [2., 6.], [1., 1.], [4, 0]]
+        data_in = [[7., np.nan], [2., 6.], [1., 1.], [4, 0]]
         ref = ([3., 3.], 10.0)
         for dt, dt_ret in self.valid_ftypes.items():
             with self.subTest(dt=dt):
-                data = self.convertData(dataIn, dt)
+                data = self.convertData(data_in, dt)
                 ret = mb.compute(data, details=self.detailed)
-                self.checkRet(ret, ref, dtype=dt_ret)
+                self.check_ret(ret, ref, dtype=dt_ret)
                 ret = mb.compute(np.array(data, dtype=dt),
                                  details=self.detailed)
-                self.checkRet(ret, ref, dtype=dt_ret)
+                self.check_ret(ret, ref, dtype=dt_ret)
 
     def testInvalidNumpyTypes(self):
         data = [1, 2, 3]
@@ -110,7 +110,7 @@ class TestTypes(unittest.TestCase):
             with self.subTest(cls=cls):
                 d = cls(data)
                 ret = mb.compute(d, details=self.detailed)
-                self.checkRet(ret, ref, dtype=float)
+                self.check_ret(ret, ref, dtype=float)
 
     def testSlices(self):
         n = 21
@@ -122,36 +122,36 @@ class TestTypes(unittest.TestCase):
         d = ((b-a)*t+a).T
         D1 = d
         D2 = d[::4, ::2]
-        refAll = (np.zeros(D1.shape[1]), 24)
-        refSlice = (np.zeros(D2.shape[1]), 12)
-        retAll = mb.compute(D1, details=self.detailed)
-        retSlice = mb.compute(D2, details=self.detailed)
-        self.checkRet(retAll, refAll, dtype=float)
-        self.checkRet(retSlice, refSlice, dtype=float)
+        ref_all = (np.zeros(D1.shape[1]), 24)
+        ref_slice = (np.zeros(D2.shape[1]), 12)
+        ret_all = mb.compute(D1, details=self.detailed)
+        ret_slice = mb.compute(D2, details=self.detailed)
+        self.check_ret(ret_all, ref_all, dtype=float)
+        self.check_ret(ret_slice, ref_slice, dtype=float)
 
     def testCornerCases(self):
         # None; results in (None, 0)
         d = None
         ret = (None, 0, None)
-        self.checkRetCC(mb.compute(d, details=self.detailed), ret)
+        self.check_ret_cc(mb.compute(d, details=self.detailed), ret)
         # Empty array; results in (None, 0)
         d = []
         ret = (None, 0, None)
-        self.checkRetCC(mb.compute(d, details=self.detailed), ret)
-        self.checkRetCC(mb.compute(np.array(d, dtype=int),
-                                   details=self.detailed), ret)
+        self.check_ret_cc(mb.compute(d, details=self.detailed), ret)
+        self.check_ret_cc(mb.compute(np.array(d, dtype=int),
+                                     details=self.detailed), ret)
         # Scalar; is treated as one 1D point [42].
         d = 42
         ret = ([42], 0, dict(center=42, radius=0, n_support=1, support=[0]))
-        self.checkRetCC(mb.compute(d, details=self.detailed), ret)
-        self.checkRetCC(mb.compute(np.array(d, dtype=int),
-                                   details=self.detailed), ret)
+        self.check_ret_cc(mb.compute(d, details=self.detailed), ret)
+        self.check_ret_cc(mb.compute(np.array(d, dtype=int),
+                                     details=self.detailed), ret)
         # 1D array; is treated as a list of 1D points.
         d = [1, 2, 4, 5]
         ret = ([3], 4, dict(center=3, radius=4, n_support=2, support=[0, 3]))
-        self.checkRetCC(mb.compute(d, details=self.detailed), ret)
-        self.checkRetCC(mb.compute(np.array(d, dtype=int),
-                                   details=self.detailed), ret)
+        self.check_ret_cc(mb.compute(d, details=self.detailed), ret)
+        self.check_ret_cc(mb.compute(np.array(d, dtype=int),
+                                     details=self.detailed), ret)
         # 3D array; raises a RuntimeError.
         d = [[[1, 2, 3], [4, 5, 6]]]
         self.assertRaises(mb.MiniballTypeError, mb.compute, d)
@@ -179,9 +179,9 @@ class TestTypes(unittest.TestCase):
         # All nans; equivalent with empty array.
         d = [[np.nan, np.nan], [1, np.nan], [0, np.nan]]
         ret = (None, np.nan, dict(center=None, support=None, is_valid=False))
-        self.checkRetCC(mb.compute(d, details=self.detailed), ret)
-        self.checkRetCC(mb.compute(np.array(d),
-                                   details=self.detailed), ret)
+        self.check_ret_cc(mb.compute(d, details=self.detailed), ret)
+        self.check_ret_cc(mb.compute(np.array(d),
+                                     details=self.detailed), ret)
 
 
 ################################################################################
