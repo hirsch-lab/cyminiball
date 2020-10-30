@@ -10,7 +10,6 @@ python:
 # command to install dependencies
 install:
   - pip install tox-travis
-  - python setup.py build_ext --inplace
   #- pip install coveralls
 # command to run tests
 script:
