@@ -3,6 +3,7 @@ import numpy as np
 from pprint import pprint
 import matplotlib.pyplot as plt
 
+
 ################################################################################
 def generate_data(n=50):
     d = 2           # Number of dimensions
@@ -70,7 +71,7 @@ def example_animated():
     visualize_data(ax, points[:-1], lim=7)
     _, _, info = miniball.compute(points, details=True)
     center, line, circle = visualize_circle(ax, info, points)
-    #circle = circle        # Circle artist
+    # circle = circle       # Circle artist
     center = center[0]      # Line2D artist
     line = line[0]          # Line2D artist
     point = ax.plot(0, 0, 'gx-')[0]  # line2D artist
@@ -118,7 +119,7 @@ def benchmark_with_details():
     n = 500000
     reps = 50
     points = generate_data(n)
-    mb = miniball # Trick, move it to locals()
+    mb = miniball  # Trick, move it to locals()
     t1 = timeit.timeit("mb.compute(points, details=True)",
                        number=reps, globals=locals())
     t2 = timeit.timeit("mb.compute(points, details=False)",

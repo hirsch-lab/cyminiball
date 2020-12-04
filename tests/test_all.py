@@ -1,15 +1,15 @@
 import unittest
 import numpy as np
-from context import miniball as mb
+import miniball as mb
 
 
 class TestTypes(unittest.TestCase):
-    valid_ftypes = { float:         float,
-                     np.float32:    np.float32,
-                     np.float64:    np.float64,
-                     np.float128:   np.float128,
-                     # np.float16:  float, # not available
-                     np.float:      float
+    valid_ftypes = {float:         float,
+                    np.float32:    np.float32,
+                    np.float64:    np.float64,
+                    np.float128:   np.float128,
+                    # np.float16:  float, # not available
+                    np.float:      float
                     }
 
     valid_itypes = {int:           float,
@@ -59,51 +59,51 @@ class TestTypes(unittest.TestCase):
             info = ret[2]
             info_ref = ref[2]
             if info is not None:
-                self.assertSubset(info, info_ref)
+                self.assert_subset(info, info_ref)
 
-    def assertSubset(self, dict_ret, dict_ref):
+    def assert_subset(self, dict_ret, dict_ref):
         dict_ret = {k: v for k, v in dict_ref.items() if k in dict_ret}
         self.assertEqual(dict_ret, dict_ref)
 
-    def convertData(self, data, dtype):
+    def convert_data(self, data, dtype):
         return [list(map(dtype, elm)) for elm in data]
 
-    def testNumpyTypes(self):
+    def test_numpy_types(self):
         # All values positive because of unsigned int tests.
         data_in = [[7., 7.], [2., 6.], [1., 1.], [3., 0.]]
         ref = ([4., 4.], 18.0)
         dtypes = {**self.valid_ftypes, **self.valid_itypes}
         for dt, dt_ret in dtypes.items():
             with self.subTest(dt=dt):
-                data = self.convertData(data_in, dt)
+                data = self.convert_data(data_in, dt)
                 ret = mb.compute(data, details=self.detailed)
                 self.check_ret(ret, ref, dtype=dt_ret)
                 ret = mb.compute(np.array(data, dtype=dt),
                                  details=self.detailed)
                 self.check_ret(ret, ref, dtype=dt_ret)
 
-    def testNumpyTypesNaN(self):
+    def test_numpy_types_nan(self):
         # Points containing np.nan are skipped.
         # All values positive because of unsigned int tests.
         data_in = [[7., np.nan], [2., 6.], [1., 1.], [4, 0]]
         ref = ([3., 3.], 10.0)
         for dt, dt_ret in self.valid_ftypes.items():
             with self.subTest(dt=dt):
-                data = self.convertData(data_in, dt)
+                data = self.convert_data(data_in, dt)
                 ret = mb.compute(data, details=self.detailed)
                 self.check_ret(ret, ref, dtype=dt_ret)
                 ret = mb.compute(np.array(data, dtype=dt),
                                  details=self.detailed)
                 self.check_ret(ret, ref, dtype=dt_ret)
 
-    def testInvalidNumpyTypes(self):
+    def test_invalid_numpy_types(self):
         data = [1, 2, 3]
         for dt in self.invalid_dtypes:
             with self.subTest(dt=dt):
                 d = np.array(data, dtype=dt)
                 self.assertRaises(mb.MiniballTypeError, mb.compute, d)
 
-    def testConversionFromIterable(self):
+    def test_conversion_from_iterable(self):
         data = [(4., 4.), (-1., 3.), (-2., -2.), (1, -3)] + [(2., 1.)]*20
         ref = ([1., 1.], 18.0)
         for cls in self.iterables:
@@ -112,7 +112,7 @@ class TestTypes(unittest.TestCase):
                 ret = mb.compute(d, details=self.detailed)
                 self.check_ret(ret, ref, dtype=float)
 
-    def testSlices(self):
+    def test_slices(self):
         n = 21
         d = 6
         t = np.linspace(0, 1, n)
@@ -129,7 +129,7 @@ class TestTypes(unittest.TestCase):
         self.check_ret(ret_all, ref_all, dtype=float)
         self.check_ret(ret_slice, ref_slice, dtype=float)
 
-    def testCornerCases(self):
+    def test_corner_cases(self):
         # None; results in (None, 0)
         d = None
         ret = (None, 0, None)
@@ -183,6 +183,7 @@ class TestTypes(unittest.TestCase):
         self.check_ret_cc(mb.compute(np.array(d),
                                      details=self.detailed), ret)
 
+
 ################################################################################
 class TestTypesDetailed(TestTypes):
     # Same as TestTypes, but with details.
@@ -195,6 +196,7 @@ class TestTypesDetailed(TestTypes):
         _, _, det = mb.compute(data, details=True, tol=1e-10)
         self.assertTrue(det["is_valid"])
 
+
 ################################################################################
 class TestRandom(unittest.TestCase):
     dtypes = [np.float32, np.float64, np.float128]
@@ -205,19 +207,20 @@ class TestRandom(unittest.TestCase):
     def setUp(self):
         self.rs = np.random.RandomState(42)
 
-    def testPlain(self):
+    def test_plain(self):
         for dt in self.dtypes:
             for d in self.n_dims:
                 for n in self.n_points:
                     with self.subTest(n=n, d=d, dt=dt):
-                        for i in range(self.n_reps):
+                        for _ in range(self.n_reps):
                             size = (n, d) if d else (n,)
                             data = self.rs.normal(0, 1, size)
                             data = data.astype(dt)
                             C_A, r2_A = mb.compute(data, details=False)
-                            C_B, r2_B, det = mb.compute(data, details=True)
+                            C_B, r2_B, _ = mb.compute(data, details=True)
                             np.testing.assert_array_equal(C_A, C_B)
                             self.assertEqual(r2_A, r2_B)
+
 
 ################################################################################
 if __name__ == "__main__":
