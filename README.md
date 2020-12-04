@@ -24,11 +24,11 @@ For an implementation in pure Python, see [`miniball`](https://pypi.org/project/
 ### Usage:
 
 ```python
-import miniball 
+import miniball
 import numpy as np
 
 d = 2           # Number of dimensions
-n = 10000       # Number of points 
+n = 10000       # Number of points
 dt = np.float   # Data type
 
 points = np.random.randn(n, d)
@@ -40,25 +40,25 @@ print("Radius:", np.sqrt(r2))
 
 Additional output can be generated using the `details` flag and `compute_max_chord()`.
 
-```python 
+```python
 C, r2, info = miniball.compute(points, details=True)
 # Returns an info dict with the following keys:
-#       center:         center 
+#       center:         center
 #       radius:         radius
 #       support:        indices of the support points
 #       relative_error: error measure realtive to r2
 #       is_valid:       numerical validity
-#       elapsed:        time required 
+#       elapsed:        time required
 #
-# Note that is_valid is based on a rather conservative 
+# Note that is_valid is based on a rather conservative
 # numerical assessment. For practical applications,
 # examine relative_error directly. It represents the
 # relative difference of the max. squared distance of
-# all points from the ball center and r2 of the miniball. 
+# all points from the ball center and r2 of the miniball.
 # The value is ideally 0 and usually very small.
 
 # The maximal chord is the longest line connecting any
-# two of the support points. The folowing extends the 
+# two of the support points. The following extends the
 # info dict by the following keys:
 #       ids_max:        ids of the two extreme points
 #       d_max:          length of the maximal chord
