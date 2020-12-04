@@ -183,31 +183,41 @@ class TestTypes(unittest.TestCase):
         self.check_ret_cc(mb.compute(np.array(d),
                                      details=self.detailed), ret)
 
-
 ################################################################################
 class TestTypesDetailed(TestTypes):
+    # Same as TestTypes, but with details.
     detailed = True
 
+    def test_small_ball(self):
+        data = [1.0, 1.0001]
+        _, _, det = mb.compute(data, details=True)
+        self.assertFalse(det["is_valid"])
+        _, _, det = mb.compute(data, details=True, tol=1e-10)
+        self.assertTrue(det["is_valid"])
 
 ################################################################################
 class TestRandom(unittest.TestCase):
-    n_points = [0, 1, 10, 10000]
-    n_dims = [0, 1, 2, 3]
+    dtypes = [np.float32, np.float64, np.float128]
+    n_points = [0, 1, 2, 3, 4, 10, 10000]
+    n_dims = [0, 1, 2, 3, 4]
+    n_reps = 10
 
     def setUp(self):
         self.rs = np.random.RandomState(42)
 
     def testPlain(self):
-        for d in self.n_dims:
-            for n in self.n_points:
-                with self.subTest(n=n, d=d):
-                    size = (n, d) if d else (n,)
-                    data = self.rs.normal(0, 1, size)
-                    C_A, r2_A = mb.compute(data, details=False)
-                    C_B, r2_B, _ = mb.compute(data, details=True)
-                    np.testing.assert_array_equal(C_A, C_B)
-                    self.assertEqual(r2_A, r2_B)
-
+        for dt in self.dtypes:
+            for d in self.n_dims:
+                for n in self.n_points:
+                    with self.subTest(n=n, d=d, dt=dt):
+                        for i in range(self.n_reps):
+                            size = (n, d) if d else (n,)
+                            data = self.rs.normal(0, 1, size)
+                            data = data.astype(dt)
+                            C_A, r2_A = mb.compute(data, details=False)
+                            C_B, r2_B, det = mb.compute(data, details=True)
+                            np.testing.assert_array_equal(C_A, C_B)
+                            self.assertEqual(r2_A, r2_B)
 
 ################################################################################
 if __name__ == "__main__":
