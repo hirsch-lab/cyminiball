@@ -2,13 +2,20 @@
 #include <iostream>
 #include <numeric>
 
+template <typename T>
+bool _is_valid(T rel_error, T subopt, T tol) {
+    // Same test as mb.is_valid() with variable tol.
+    return (rel_error <= tol) && (subopt == 0);
+}
+
+
 /**
 C-style API function.
 */
 template <typename T>
 bool _compute_miniball(T** points, size_t n_points,
                        T* center, size_t n_dims,
-                       T& r2) {
+                       T& r2, T tol) {
     typedef T* const* PIt;
     typedef const T* CIt;
     typedef Miniball::Miniball <Miniball::CoordAccessor<PIt, CIt> > MB;
@@ -16,7 +23,10 @@ bool _compute_miniball(T** points, size_t n_points,
     r2 = mb.squared_radius();
     for (size_t i=0; i<n_dims; ++i)
         center[i] = mb.center()[i];
-    return mb.is_valid();
+
+    T subopt = 0;
+    T rel_error = mb.relative_error(subopt);
+    return _is_valid(rel_error, subopt, tol);
 }
 
 
@@ -31,7 +41,7 @@ bool _compute_miniball_extended(T** points, size_t n_points,
                                 T* center, size_t n_dims, T& r2,
                                 int* support_ids, int& n_support,
                                 T& suboptimality, T& relative_error,
-                                T& elapsed)
+                                T& elapsed, T tol)
 {
     typedef T* const* PIt;
     typedef const T* CIt;
@@ -66,5 +76,5 @@ bool _compute_miniball_extended(T** points, size_t n_points,
     elapsed = mb.get_time();
     suboptimality = 1;
     relative_error = mb.relative_error(suboptimality);
-    return mb.is_valid();
+    return _is_valid(relative_error, suboptimality, tol);
 }
