@@ -98,6 +98,39 @@ def example_animated():
     FuncAnimation(fig, update, frames=xrange, interval=30,
                   init_func=init, blit=True)
 
+
+################################################################################
+def benchmark_with_details():
+    """
+    Measure the overhead for miniball.compute(*, details=True).
+    Last measurement for commit 23c47f7 (04.12.2020)
+        With details:    8.948ms
+        Without details: 8.959ms
+        Difference:      0.13%
+    Measurement for commit ffbdb7c (30.10.2020)
+        With details:    8.988ms
+        Without details: 8.079ms
+        Difference:      -10.11%
+    Not clear what exactly made the difference (likely commit cb9efc2).
+    However, better observe this for future versions and different platforms.
+    """
+    import timeit
+    n = 500000
+    reps = 50
+    points = generate_data(n)
+    mb = miniball # Trick, move it to locals()
+    t1 = timeit.timeit("mb.compute(points, details=True)",
+                       number=reps, globals=locals())
+    t2 = timeit.timeit("mb.compute(points, details=False)",
+                       number=reps, globals=locals())
+    print()
+    print("Problem size:    %g" % n)
+    print("Number of reps:  %d" % reps)
+    print("With details:    %.3fms" % (t1/reps*1000))
+    print("Without details: %.3fms" % (t2/reps*1000))
+    print("Difference:      %.2f%%" % ((t2/t1-1)*100))
+
+
 ################################################################################
 if __name__ == "__main__":
     example_basic()
