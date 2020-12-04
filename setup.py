@@ -1,21 +1,38 @@
+"""Package build and install script.
+
+Useful commands:
+    python setup.py clean                   Clean temporary files
+    python setup.py sdist                   Create source distribution (.tar.gz)
+    python setup.py bdist_wheel             Create built distribution (.whl)
+    python setup.py sdist bdist_wheel       Create both
+    python setup.py build_ext --inplace     Build C/C++ and Cython extensions
+    python setup.py flake8                  Run flake8 (coding style check)
+    pip install dist/cyminiball...tar.gz    Install from local tarball
+    pip show cyminiball                     Show package information
+    pip uninstall cyminiball                Uninstall
+    twine check dist/*                      Check the markup in the README
+    twine upload --repository testpypi dist/* Upload everything to TestPyPI
+    pip install --index-url https://test.pypi.org/simple/ --no-deps cyminiball
+"""
+
 import sys
 import numpy
 from pathlib import Path
 from setuptools import setup, Extension
 
-# Useful commands:
-# python setup.py clean                   Clean temporary files
-# python setup.py sdist                   Create source distribution (.tar.gz)
-# python setup.py bdist_wheel             Create built distribution (.whl)
-# python setup.py sdist bdist_wheel       Create both
-# python setup.py build_ext --inplace     Build C/C++ and Cython extensions
-# python setup.py flake8                  Run flake8 (coding style check)
-# pip install dist/miniball-....tar.gz    Install from local tarball
-# pip show miniball-wrap                  Show package information
-# pip uninstall miniball-wrap             Uninstall
-# twine check dist/*                      Check the markup in the README
-# twine upload --repository testpypi dist/* Upload everything to TestPyPI
-# pip install --index-url https://test.pypi.org/simple/ --no-deps miniball-wrap
+
+def get_version():
+    """Loads version from VERSION file. Raises an IOError on failure."""
+    with open("VERSION", "r") as fid:
+        ret = fid.read().strip()
+    return ret
+
+
+def get_readme():
+    """Load README.rst for display on PyPI."""
+    with open("README.md", encoding="utf-8") as fid:
+        return fid.read()
+
 
 cmdclass = {}
 subcommand = sys.argv[1] if len(sys.argv) > 1 else None
@@ -35,17 +52,14 @@ else:
 include_dirs = [Path(__file__).parent.absolute(),
                 numpy.get_include()]
 
-with open("README.md", encoding="utf-8") as fid:
-    long_description = fid.read()
-
 setup(name="cyminiball",
-      version="1.0.0",
+      version=get_version(),
       url="https://github.com/hirsch-lab/cyminiball",
       author="Norman Juchler",
       author_email="normanius@gmail.com",
       description=("Compute the smallest bounding ball of a point cloud. "
                    "Cython binding of the popular miniball utility. Fast!"),
-      long_description=long_description,
+      long_description=get_readme(),
       long_description_content_type="text/markdown",
       license="LGPLv3",
       keywords="miniball geometry fast",
