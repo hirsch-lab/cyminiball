@@ -6,7 +6,9 @@
 <!--https://pypistats.org/packages/cyminiball-->
 [![image](https://img.shields.io/pypi/v/cyminiball.svg)](https://pypi.org/project/cyminiball/)
 [![License](https://img.shields.io/pypi/l/cyminiball)](https://github.com/hirsch-lab/cyminiball/blob/main/LICENSE)
+[![Build Status](https://travis-ci.org/hirsch-lab/cyminiball.svg?branch=main)](https://travis-ci.org/hirsch-lab/cyminiball)
 [![CodeFactor](https://www.codefactor.io/repository/github/hirsch-lab/cyminiball/badge)](https://www.codefactor.io/repository/github/hirsch-lab/cyminiball)
+[![DeepSource](https://deepsource.io/gh/hirsch-lab/cyminiball.svg/?label=active+issues)](https://deepsource.io/gh/hirsch-lab/cyminiball/?ref=repository-badge)
 <!--Travis build and test-->
 <!--Coveralls.io-->
 <!--Read-the-docs not required for such a small project-->
@@ -24,7 +26,7 @@ For an implementation in pure Python, see [`miniball`](https://pypi.org/project/
 ### Usage:
 
 ```python
-import miniball
+import cyminiball as miniball
 import numpy as np
 
 d = 2           # Number of dimensions
