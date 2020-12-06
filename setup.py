@@ -59,7 +59,7 @@ if use_cython:
         from Cython.Build import cythonize
         extensions = cythonize(extensions)
     except ModuleNotFoundError:
-        msg = ("A Cython build was triggered but it is not available.\n"
+        msg = ("A Cython build was triggered but Cython is not available.\n"
                "Make sure to install Cython: python -m pip install Cython")
         raise RuntimeError(msg) from None
 

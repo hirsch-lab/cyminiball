@@ -10,6 +10,8 @@ python:
 # command to install dependencies
 install:
   - pip install tox-travis
+  - pip install Cython
+  - python setup.py sdist bdist_wheel
   #- pip install coveralls
 # command to run tests
 script:
