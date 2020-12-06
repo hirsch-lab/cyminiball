@@ -65,7 +65,7 @@ class TestTypes(unittest.TestCase):
         dict_ret = {k: v for k, v in dict_ref.items() if k in dict_ret}
         self.assertEqual(dict_ret, dict_ref)
 
-    def convert_data(self, data, dtype):
+    def _convert_data(data, dtype):
         return [list(map(dtype, elm)) for elm in data]
 
     def test_numpy_types(self):
@@ -75,7 +75,7 @@ class TestTypes(unittest.TestCase):
         dtypes = {**self.valid_ftypes, **self.valid_itypes}
         for dt, dt_ret in dtypes.items():
             with self.subTest(dt=dt):
-                data = self.convert_data(data_in, dt)
+                data = TestTypes._convert_data(data_in, dt)
                 ret = mb.compute(data, details=self.detailed)
                 self.check_ret(ret, ref, dtype=dt_ret)
                 ret = mb.compute(np.array(data, dtype=dt),
@@ -89,7 +89,7 @@ class TestTypes(unittest.TestCase):
         ref = ([3., 3.], 10.0)
         for dt, dt_ret in self.valid_ftypes.items():
             with self.subTest(dt=dt):
-                data = self.convert_data(data_in, dt)
+                data = TestTypes._convert_data(data_in, dt)
                 ret = mb.compute(data, details=self.detailed)
                 self.check_ret(ret, ref, dtype=dt_ret)
                 ret = mb.compute(np.array(data, dtype=dt),

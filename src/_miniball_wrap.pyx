@@ -60,7 +60,7 @@ def _compute_float(float_type[:,:] points not None,
         dtype = np.float64
         #dtype = np.double
     elif float_type is cython.longdouble:
-        # Don't use np.float128, it may not work on Windows/conda.
+        # Don't use np.float128, it may not work on Windows/conda.
         # https://stackoverflow.com/questions/29820829
         # dtype = np.float128
         dtype = np.longdouble
