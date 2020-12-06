@@ -9,14 +9,6 @@ from libcpp cimport bool, limits
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
 
 
-# Meta information.
-# TODO: move to some __init__.py file
-# or use meta data from setup.py
-__version__ = "1.1.0"
-__author__ = "Norman Juchler"
-__email__ = "normanius@gmail.com"
-
-
 # Good practice: Use the Numpy-C-API from Cython
 cnp.import_array()
 

@@ -1,5 +1,7 @@
 include bindings/*.hpp
 include bindings/*.cpp
+include bindings/*.pyx
+include bindings/*.py
 include setup.py
 include MANIFEST.in
 include LICENSE
