@@ -21,64 +21,26 @@ from pathlib import Path
 from setuptools import setup, Extension
 
 
-def get_version():
-    """Loads version from VERSION file. Raises an IOError on failure."""
-    with open("VERSION", "r") as fid:
-        ret = fid.read().strip()
-    return ret
-
-
-def get_readme():
-    """Load README.rst for display on PyPI."""
-    with open("README.md", encoding="utf-8") as fid:
-        return fid.read()
-
-
-cmdclass = {}
 subcommand = sys.argv[1] if len(sys.argv) > 1 else None
-if subcommand == "build_ext":
-    # This requires Cython. We come here if the extension package is built.
-    from Cython.Distutils import build_ext
-    # To get some HTML output with an overview of the generate C code.
-    import Cython.Compiler.Options
-    Cython.Compiler.Options.annotate = True
-    # Cython src.
-    miniball_src = ["bindings/_miniball_wrap.pyx"]
-    cmdclass["build_ext"] = build_ext
-else:
-    # This uses the "pre-compiled" Cython output.
-    miniball_src = ["bindings/_miniball_wrap.cpp"]
+USE_CYTHON = subcommand == "build_ext"
 
-include_dirs = [Path(__file__).parent.absolute(),
+packages = ["miniball"]
+package_dir = {"miniball": "bindings"}
+ext = ".pyx" if USE_CYTHON else ".cpp"
+miniball_src = ["bindings/_miniball_wrap"+ext]
+include_dirs = [str(Path(__file__).parent.absolute()),
                 numpy.get_include()]
 
-setup(name="cyminiball",
-      version=get_version(),
-      url="https://github.com/hirsch-lab/cyminiball",
-      author="Norman Juchler",
-      author_email="normanius@gmail.com",
-      description=("Compute the smallest bounding ball of a point cloud. "
-                   "Cython binding of the popular miniball utility. Fast!"),
-      long_description=get_readme(),
-      long_description_content_type="text/markdown",
-      license="LGPLv3",
-      keywords="miniball geometry fast",
-      cmdclass=cmdclass,
-      install_requires=["numpy"],
-      ext_modules=[Extension("miniball",
-                             sources=miniball_src,
-                             include_dirs=include_dirs,
-                             language="c++",
-                             extra_compile_args=["-std=c++11"])],
-      classifiers=[
-            "Programming Language :: Python :: 3",
-            "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-            "Operating System :: OS Independent",
-            "Topic :: Scientific/Engineering :: Mathematics",
-            "Topic :: Software Development :: Libraries",
-            "Topic :: Utilities",
-            "Intended Audience :: Developers",
-            "Intended Audience :: Science/Research",
-      ],
-      # setup_requires=["flake8"]
-      )
+extensions = [Extension("miniball",
+                        sources=miniball_src,
+                        include_dirs=include_dirs,
+                        language="c++",
+                        extra_compile_args=["-std=c++11"])]
+
+if USE_CYTHON:
+    from Cython.Build import cythonize
+    extensions = cythonize(extensions)
+
+setup(ext_modules=extensions,
+      packages=packages,
+      package_dir=package_dir)
