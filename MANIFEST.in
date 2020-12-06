@@ -1,7 +1,7 @@
-include bindings/*.hpp
-include bindings/*.cpp
-include bindings/*.pyx
-include bindings/*.py
+include src/*.hpp
+include src/*.cpp
+include src/*.pyx
+include src/*.py
 include setup.py
 include MANIFEST.in
 include LICENSE
@@ -10,7 +10,7 @@ include VERSION
 
 graft examples
 graft tests
-graft miniball
+graft src/miniball
 
 exclude **/.DS_Store
 exclude **/__pycache__/**

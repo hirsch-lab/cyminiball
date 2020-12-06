@@ -1,5 +1,5 @@
-import miniball
 import numpy as np
+import cyminiball as mb
 from pprint import pprint
 import matplotlib.pyplot as plt
 
@@ -45,8 +45,8 @@ def example_basic():
     points[0] = [3, 0]
     points[-1] = [-2, -3]
 
-    C, r2, info = miniball.compute(points, details=True)
-    info = miniball.compute_max_chord(points=points, info=info)
+    C, r2, info = mb.compute(points, details=True)
+    info = mb.compute_max_chord(points=points, info=info)
     print("Center:   %s" % C)
     print("Radius:   %.3f" % np.sqrt(r2))
     print("Info:")
@@ -69,7 +69,7 @@ def example_animated():
     # Set up animation.
     fig, ax = plt.subplots()
     visualize_data(ax, points[:-1], lim=7)
-    _, _, info = miniball.compute(points, details=True)
+    _, _, info = mb.compute(points, details=True)
     center, line, circle = visualize_circle(ax, info, points)
     # circle = circle       # Circle artist
     center = center[0]      # Line2D artist
@@ -85,7 +85,7 @@ def example_animated():
         # Update x coordinate of last point.
         points[-1, 0] = x
         # Re-compute miniball.
-        C, r2, info = miniball.compute(points, details=True)
+        C, r2, info = mb.compute(points, details=True)
         # Update artists.
         circle.center = C
         circle.radius = np.sqrt(r2)
@@ -103,7 +103,7 @@ def example_animated():
 ################################################################################
 def benchmark_with_details():
     """
-    Measure the overhead for miniball.compute(*, details=True).
+    Measure the overhead for mb.compute(*, details=True).
     Last measurement for commit 23c47f7 (04.12.2020)
         With details:    8.948ms
         Without details: 8.959ms
@@ -119,10 +119,10 @@ def benchmark_with_details():
     n = 500000
     reps = 50
     points = generate_data(n)
-    mb = miniball  # Trick, move it to locals()
-    t1 = timeit.timeit("mb.compute(points, details=True)",
+    mb_ = mb  # Trick, move it to locals()
+    t1 = timeit.timeit("mb_.compute(points, details=True)",
                        number=reps, globals=locals())
-    t2 = timeit.timeit("mb.compute(points, details=False)",
+    t2 = timeit.timeit("mb_.compute(points, details=False)",
                        number=reps, globals=locals())
     print()
     print("Problem size:    %g" % n)

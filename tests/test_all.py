@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-import miniball as mb
+import cyminiball as mb
 
 
 class TestTypes(unittest.TestCase):
