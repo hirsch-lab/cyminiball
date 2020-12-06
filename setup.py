@@ -37,10 +37,10 @@ from setuptools import setup, Extension
 
 
 subcommand = sys.argv[1] if len(sys.argv) > 1 else None
-use_cython = ((subcommand == "build_ext") # This is possibly a bit hacky.
+use_cython = ((subcommand == "build_ext")  # This is possibly a bit hacky.
               or not Path("src/_miniball_wrap.cpp").is_file()
-              or (os.getenv("CYMINIBALL_USE_CYTHON", False)
-                  not in (False, "0", "false")))
+              or (os.getenv("CYMINIBALL_USE_CYTHON", None)
+                  not in (None, "0", "false")))
 
 packages = ["cyminiball"]
 package_dir = {"cyminiball": "src",
