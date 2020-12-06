@@ -15,4 +15,5 @@ install:
 # command to run tests
 script:
   - tox -vv
-#after_success: coveralls
+after_success:
+  - coveralls
