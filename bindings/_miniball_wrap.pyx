@@ -28,6 +28,7 @@ ctypedef fused float_type:
     #          python float (cython.double). The ndarray however
     #          are represented correctly, and miniball also
     #          employs the long double data type.
+    # Note:    Long doubles are equivalent to doubles on Windows
     cython.longdouble
     cython.float
     cython.double
@@ -67,7 +68,10 @@ def _compute_float(float_type[:,:] points not None,
         dtype = np.float64
         #dtype = np.double
     elif float_type is cython.longdouble:
-        dtype = np.float128
+        # Don't use np.float128, it may not work on Windows/conda.
+        # https://stackoverflow.com/questions/29820829
+        # dtype = np.float128
+        dtype = np.longdouble
     else:
         # In the unlikely event we come here, check the
         # available/supported cython floating point types
