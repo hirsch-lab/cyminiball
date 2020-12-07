@@ -5,8 +5,9 @@ import numpy as np
 import cython
 cimport numpy as cnp
 cimport cython
-from libcpp cimport bool
+from libcpp cimport bool, limits
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
+
 
 # Good practice: Use the Numpy-C-API from Cython
 cnp.import_array()
@@ -19,6 +20,7 @@ ctypedef fused float_type:
     #          python float (cython.double). The ndarray however
     #          are represented correctly, and miniball also
     #          employs the long double data type.
+    # Note:    Long doubles are equivalent to doubles on Windows
     cython.longdouble
     cython.float
     cython.double
@@ -27,19 +29,34 @@ class MiniballError(Exception):
     pass
 class MiniballTypeError(TypeError, MiniballError):
     pass
+class MiniballValueError(ValueError, MiniballError):
+    pass
+
 
 ################################################################################
 cdef extern from "_miniball_wrap.hpp" nogil:
     bool _compute_miniball[T](T** points, size_t n_points,
-                              T* center, size_t n_dims, T& r2)
+                              T* center, size_t n_dims,
+                              T& r2, T tol)
     bool _compute_miniball_extended[T](T** points, size_t n_points,
                                        T* center, size_t n_dims, T& r2,
                                        int* support_ids, int& n_support,
                                        T& suboptimality, T& relative_error,
-                                       T& elapsed)
+                                       T& elapsed, T tol)
+
 
 ################################################################################
-def _compute_float(float_type[:,:] points not None, bool details):
+def _compute_float(float_type[:,:] points not None,
+                   bool details,
+                   float_type tol):
+    """
+    The tolerance is used to set the is_valid flag (if details=True).
+    is_valid is set as a function of the relative_error and suboptimality:
+    Note that the relative error depends on the size of the miniball.
+    For smaller miniballs, the relative error increases.
+    In miniball.hpp, the suggested tolerance is set to 10 times the
+    machine's tolerance.
+    """
     # Handle different floating-point types properly.
     if float_type is cython.float:
         dtype = np.float32
@@ -47,7 +64,10 @@ def _compute_float(float_type[:,:] points not None, bool details):
         dtype = np.float64
         #dtype = np.double
     elif float_type is cython.longdouble:
-        dtype = np.float128
+        # Don't use np.float128, it may not work on Windows/conda.
+        # https://stackoverflow.com/questions/29820829
+        # dtype = np.float128
+        dtype = np.longdouble
     else:
         # In the unlikely event we come here, check the
         # available/supported cython floating point types
@@ -64,9 +84,12 @@ def _compute_float(float_type[:,:] points not None, bool details):
     cdef float_type relative_error = 0.
     cdef float_type elapsed = 0.
     cdef bool is_valid = False
+    if tol < 0:
+        tol = 10*limits.numeric_limits[float_type].epsilon()
+
     start = time.time()
     # If float_type is cython.longdouble, r2 is a normal float (cython.double).
-    # TODO: Understand why! See comment above (ctypedef).
+    # TODO: Understand why! See comment above (ctypedef).
     # print(type(r2))
 
     # The following line often is a no-op, unless slices are involved.
@@ -108,21 +131,18 @@ def _compute_float(float_type[:,:] points not None, bool details):
                 &center_view[0], n_dims, r2,
                 &support_ids_view[0], n_support,
                 suboptimality, relative_error,
-                elapsed)
+                elapsed, tol)
         else:
             # Compute miniball with basic output: center and squared radius.
             is_valid = _compute_miniball(point_ptrs, n_points,
-                                         &center_view[0], n_dims, r2)
-        if not is_valid:
-            msg = "Encountered a problem when computing the miniball."
-            raise MiniballError(msg)
+                                         &center_view[0], n_dims,
+                                         r2, tol)
     finally:
         PyMem_Free(point_ptrs)
     stop = time.time()
     if np.isnan(center).all():
         center = None
         r2 = np.nan
-        is_valid = False
     if details:
         support_ids = support_ids[:n_support]
         info = { "center": center,
@@ -141,16 +161,18 @@ def _compute_float(float_type[:,:] points not None, bool details):
     #print(stop-start)
     return ret
 
+
 ################################################################################
-def compute_no_checks(points, details=False):
+def compute_no_checks(points, details=False, tol=None):
     """Compute the minimal bounding ball without any checks. Otherwise
     equivalent to miniball.compute().
     """
-    return _compute_float(points, details)
+    tol = -1 if tol is None else tol
+    return _compute_float(points, details, tol)
 
 
 ################################################################################
-def compute(points, details=False):
+def compute(points, details=False, tol=None):
     """Compute the minimal bounding ball for a set of points with arbitrary
     dimensions. The code runs the popular and efficient miniball algorithm
     by Bernd Gärtner [1].
@@ -160,6 +182,14 @@ def compute(points, details=False):
     Args:
         points: Data array of shape (n,d) containing n points in d dimensions.
         details: Enable additional output about the miniball. Default: False
+        tol: Tolerance. Only relevant if details=True. It affects the
+             is_valid flag of the returned info dictionary, which represents
+             the result of a numerical validity test. It has no effect on the
+             actual miniball (center, radius). By default, tol is set to 10x
+             the machine epsilon of the dtype. The numerical validity test
+             for a miniball depends on its actual size. Smaller balls are
+             more likely to fail the test. The test is defined as follows:
+                (relative_error < tol) && (suboptimality == 0)
 
     Returns:
         A tuple (c, r2) with the center c and  the squared radius r2 of the
@@ -175,15 +205,14 @@ def compute(points, details=False):
 
         See the code documentation in [1] for further details.
     """
-    ret_default = (None, 0, None) if details else (None, 0)
     if points is None:
-        return ret_default
+        raise MiniballValueError("Argument points cannot be None.")
     elif issubclass(type(points), str):
         msg = "Expecting a 2D array but received a string."
         raise MiniballTypeError(msg)
     elif isinstance(points, set):
-        # TODO: Extract pointers of the set and feed directly to
-        # _compute_miniball instead of creating a superfluous copy.
+        # TODO: Extract pointers of the set and feed directly to
+        # _compute_miniball instead of creating a superfluous copy.
         points = list(points)
 
     # Create an ndarray.
@@ -195,25 +224,26 @@ def compute(points, details=False):
         points = np.asarray(points, dtype=float)
     if issubclass(points.dtype.type, complex):
         msg = "Complex arrays are not supported by miniball."
-        raise MiniballTypeError(msg)
+        raise MiniballValueError(msg)
     elif points.dtype.kind != "f":
         msg = ("Invalid dtype (%s) encountered. Expecting a "
                "numeric 2D array of points.")
-        raise MiniballTypeError(msg % points.dtype)
+        raise MiniballValueError(msg % points.dtype)
     if issubclass(points.dtype.type, np.float16):
         msg = ("Invalid dtype (np.float16) encountered. Use np.float instead.")
-        raise MiniballTypeError(msg)
+        raise MiniballValueError(msg)
 
     # Check shape.
     if points.size==0:
-        return ret_default
+        raise MiniballValueError("No data to process, points is empty.")
     elif len(points.shape)<2:
         # Handle a 0D or 1D array as a list of points in 1D.
         points = np.atleast_2d(points).T
     elif len(points.shape)>2:
         msg = "Expecting a 2D array but received a %dD array (shape: %s)."
-        raise MiniballTypeError(msg % (len(points.shape), points.shape))
-    return compute_no_checks(points, details)
+        raise MiniballValueError(msg % (len(points.shape), points.shape))
+    return compute_no_checks(points, details, tol)
+
 
 ################################################################################
 def get_bounding_ball(points):
@@ -221,33 +251,49 @@ def get_bounding_ball(points):
     cyminiball package a drop-in replacement for another miniball project
     available on PyPi: https://pypi.org/project/miniball/
     """
-    return compute(points, details=False)
+    return compute(points, details=False, tol=None)
+
 
 ################################################################################
-def compute_max_chord(points, info=None):
+def compute_max_chord(points, info=None, details=False, tol=None):
     """Compute the longest chord between the support points of the miniball.
     If info is None, compute(points, details=True) will be called internally:
 
         # Alternative A:
-        info = compute_max_chord(points)
+        (p1, p2), d_max = compute_max_chord(points)
         # Alternative B:
         _, _, info = compute(..., detailed=True)
-        info = compute_max_chord(points=points, info=info)
+        (p1, p2), d_max = compute_max_chord(points=points, info=info)
 
-    Extends the info dictionary (in-place) by the following keys:
 
-        ids_max: ids of the points forming the maximum chord
-        d_max: length of the maximum chord
+    Returns:
+        pts_max:    Point coordinates that form the maximum chord
+        d_max:      The length of the maximum chord
+        info:       Optional, if details=True. An info dictionary with
+                    additional data about the miniball, extended by the
+                    maximum chord info. Extends the info dictionary
+                    (in-place) by the following keys: ids_max, d_max.
     """
     if points is None:
-        raise MiniballError("Argument points cannot be None")
+        raise MiniballValueError("Argument points cannot be None.")
     if info is None:
-        _, _, info = compute(points=points, details=True)
-    points = np.asarray(points)
-    support = points[info["support"]]
-    pdist = np.linalg.norm(support[:,None,:] - support[None,:,:], axis=-1)
-    ids_max = list(np.unravel_index(np.argmax(pdist, axis=None), pdist.shape))
-    info["ids_max"] = info["support"][ids_max]
-    info["d_max"] = pdist[ids_max]
-    return info
+        _, _, info = compute(points=points, details=True, tol=tol)
+    points = np.atleast_1d(points)
+    if len(points.shape)<2:
+        info["ids_max"] = np.array([info["support"][0], info["support"][-1]])
+        info["pts_max"] = points[info["ids_max"]]
+        info["d_max"] = info["radius"]*2
+    else:
+        support = points[info["support"]]
+        pdist = np.linalg.norm(support[:,None,:] - support[None,:,:], axis=-1)
+        ids_max = np.unravel_index(np.argmax(pdist, axis=None), pdist.shape)
+        ids_max = list(ids_max)
+        info["ids_max"] = info["support"][ids_max]
+        info["pts_max"] = points[info["ids_max"]]
+        info["d_max"] = pdist[tuple(ids_max)]
+    if details:
+        ret = (info["pts_max"], info["d_max"], info)
+    else:
+        ret = (info["pts_max"], info["d_max"])
+    return ret
 

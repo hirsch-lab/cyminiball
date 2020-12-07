@@ -1,8 +1,14 @@
 dist/
 build/
 __pycache__/
-bindings/_miniball_wrap.cpp
-bindings/_miniball_wrap.html
+src/_miniball_wrap.cpp
+src/_miniball_wrap.html
 *.egg-info
 *.so
 MANIFEST
+
+# Output of coverage (via pytest-cov)
+.coverage
+
+# Output of tox
+.tox/

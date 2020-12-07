@@ -1,9 +1,16 @@
-include bindings/*.hpp
-include bindings/*.cpp
+include src/*.hpp
+include src/*.cpp
+include src/*.pyx
+include src/*.py
 include setup.py
 include MANIFEST.in
 include LICENSE
 include README.md
+include VERSION
 
-graft test
-graft miniball
+graft examples
+graft tests
+graft src/miniball
+
+exclude **/.DS_Store
+exclude **/__pycache__/**
