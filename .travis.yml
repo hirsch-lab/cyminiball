@@ -9,11 +9,14 @@ python:
   #- "pypy3"
 # command to install dependencies
 install:
-  - pip install tox-travis coveralls
+  - pip install tox-travis
+  - pip install coveralls
   - pip install Cython
+before_script:
+  - python setup.py build_ext --inplace --define CYTHON_TRACE
   - python setup.py sdist bdist_wheel
 # command to run tests
 script:
-  - tox -vv
+  - tox
 after_success:
   - coveralls
