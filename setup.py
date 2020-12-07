@@ -39,7 +39,7 @@ from setuptools import setup, Extension
 # Decide whether a cythonization of the pyx-file is required.
 # Cythonization is done automatically if the generated .cpp
 # does not yet exist, if setup.py is called with positional
-# argument build_ext or if the envvar CYMINIBALL_CYTHONIZE
+# argument build_ext or if the envvar CYMINIBALL_CYTHONIZE
 # is set to 1.
 nos = (None, "0", "false")
 subcommand = sys.argv[1] if len(sys.argv) > 1 else None

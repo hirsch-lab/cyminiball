@@ -140,7 +140,7 @@ class TestTypes(unittest.TestCase):
         self.assertRaises(mb.MiniballValueError, mb.compute,
                           np.array(d, dtype=int), details=self.detailed)
         self.assertRaises(mb.MiniballValueError, mb.compute,
-                          np.empty([0,4], dtype=float), details=self.detailed)
+                          np.empty([0, 4], dtype=float), details=self.detailed)
         # Scalar; is treated as one 1D point [42].
         d = 42
         ret = ([42], 0, dict(center=42, radius=0, n_support=1, support=[0]))
@@ -195,12 +195,12 @@ class TestTypes(unittest.TestCase):
         self.assertRaises(mb.MiniballValueError, mb.compute_max_chord,
                           np.array(d, dtype=int))
         self.assertRaises(mb.MiniballValueError, mb.compute_max_chord,
-                          np.empty([0,4], dtype=float))
+                          np.empty([0, 4], dtype=float))
         # Scalar; is treated as one 1D point [42].
         d = 42
         ret = dict(center=42, radius=0,
                    n_support=1, support=[0],
-                   ids_max=[0,0], d_max=0)
+                   ids_max=[0, 0], d_max=0)
         self.assert_subset(mb.compute_max_chord(d), ret)
         self.assert_subset(mb.compute_max_chord(np.array(d, dtype=int)), ret)
         # 1D array; is treated as a list of 1D points.
