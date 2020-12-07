@@ -46,7 +46,7 @@ def example_basic():
     points[-1] = [-2, -3]
 
     C, r2, info = mb.compute(points, details=True)
-    info = mb.compute_max_chord(points=points, info=info)
+    _, _ = mb.compute_max_chord(points=points, info=info)
     print("Center:   %s" % C)
     print("Radius:   %.3f" % np.sqrt(r2))
     print("Info:")

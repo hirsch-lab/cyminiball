@@ -1,6 +1,5 @@
 # cython: infer_types=True
 # cython: language_level=3
-import copy
 import time
 import numpy as np
 import cython
@@ -33,6 +32,7 @@ class MiniballTypeError(TypeError, MiniballError):
 class MiniballValueError(ValueError, MiniballError):
     pass
 
+
 ################################################################################
 cdef extern from "_miniball_wrap.hpp" nogil:
     bool _compute_miniball[T](T** points, size_t n_points,
@@ -43,6 +43,7 @@ cdef extern from "_miniball_wrap.hpp" nogil:
                                        int* support_ids, int& n_support,
                                        T& suboptimality, T& relative_error,
                                        T& elapsed, T tol)
+
 
 ################################################################################
 def _compute_float(float_type[:,:] points not None,
@@ -160,6 +161,7 @@ def _compute_float(float_type[:,:] points not None,
     #print(stop-start)
     return ret
 
+
 ################################################################################
 def compute_no_checks(points, details=False, tol=None):
     """Compute the minimal bounding ball without any checks. Otherwise
@@ -167,6 +169,7 @@ def compute_no_checks(points, details=False, tol=None):
     """
     tol = -1 if tol is None else tol
     return _compute_float(points, details, tol)
+
 
 ################################################################################
 def compute(points, details=False, tol=None):
@@ -241,6 +244,7 @@ def compute(points, details=False, tol=None):
         raise MiniballValueError(msg % (len(points.shape), points.shape))
     return compute_no_checks(points, details, tol)
 
+
 ################################################################################
 def get_bounding_ball(points):
     """An alias for miniball.compute() with the purpose to make the
@@ -249,37 +253,47 @@ def get_bounding_ball(points):
     """
     return compute(points, details=False, tol=None)
 
+
 ################################################################################
-def compute_max_chord(points, info=None, tol=None):
+def compute_max_chord(points, info=None, details=False, tol=None):
     """Compute the longest chord between the support points of the miniball.
     If info is None, compute(points, details=True) will be called internally:
 
         # Alternative A:
-        info = compute_max_chord(points)
+        (p1, p2), d_max = compute_max_chord(points)
         # Alternative B:
         _, _, info = compute(..., detailed=True)
-        info = compute_max_chord(points=points, info=info)
+        (p1, p2), d_max = compute_max_chord(points=points, info=info)
 
-    Extends the info dictionary (in-place) by the following keys:
 
-        ids_max: ids of the points forming the maximum chord
-        d_max: length of the maximum chord
+    Returns:
+        pts_max:    Point coordinates that form the maximum chord
+        d_max:      The length of the maximum chord
+        info:       Optional, if details=True. An info dictionary with
+                    additional data about the miniball, extended by the
+                    maximum chord info. Extends the info dictionary
+                    (in-place) by the following keys: ids_max, d_max.
     """
     if points is None:
         raise MiniballValueError("Argument points cannot be None.")
     if info is None:
         _, _, info = compute(points=points, details=True, tol=tol)
-    points = np.asarray(points)
-    if info is None:
-        return info
+    points = np.atleast_1d(points)
     if len(points.shape)<2:
-        info["ids_max"] = copy.deepcopy(info["support"])
+        info["ids_max"] = np.array([info["support"][0], info["support"][-1]])
+        info["pts_max"] = points[info["ids_max"]]
         info["d_max"] = info["radius"]*2
-        return info
-    support = points[info["support"]]
-    pdist = np.linalg.norm(support[:,None,:] - support[None,:,:], axis=-1)
-    ids_max = list(np.unravel_index(np.argmax(pdist, axis=None), pdist.shape))
-    info["ids_max"] = info["support"][ids_max]
-    info["d_max"] = pdist[tuple(ids_max)]
-    return info
+    else:
+        support = points[info["support"]]
+        pdist = np.linalg.norm(support[:,None,:] - support[None,:,:], axis=-1)
+        ids_max = np.unravel_index(np.argmax(pdist, axis=None), pdist.shape)
+        ids_max = list(ids_max)
+        info["ids_max"] = info["support"][ids_max]
+        info["pts_max"] = points[info["ids_max"]]
+        info["d_max"] = pdist[tuple(ids_max)]
+    if details:
+        ret = (info["pts_max"], info["d_max"], info)
+    else:
+        ret = (info["pts_max"], info["d_max"])
+    return ret
 

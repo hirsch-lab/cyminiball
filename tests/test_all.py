@@ -177,7 +177,7 @@ class TestTypes(unittest.TestCase):
         d = [2, 1, None]
         self.assertRaises(mb.MiniballValueError, mb.compute, d)
         self.assertRaises(mb.MiniballValueError, mb.compute, np.array(d))
-        # All nans; equivalent with empty array.
+        # All nans.
         d = [[np.nan, np.nan], [1, np.nan], [0, np.nan]]
         ret = (None, np.nan, dict(center=None, support=None, is_valid=False))
         self.check_ret_cc(mb.compute(d, details=self.detailed), ret)
@@ -198,17 +198,19 @@ class TestTypes(unittest.TestCase):
                           np.empty([0, 4], dtype=float))
         # Scalar; is treated as one 1D point [42].
         d = 42
-        ret = dict(center=42, radius=0,
-                   n_support=1, support=[0],
-                   ids_max=[0, 0], d_max=0)
-        self.assert_subset(mb.compute_max_chord(d), ret)
-        self.assert_subset(mb.compute_max_chord(np.array(d, dtype=int)), ret)
+        ret = ([42, 42], 0, dict(center=42, radius=0,
+                                 n_support=1, support=[0],
+                                 pts_max=[42, 42], ids_max=[0, 0], d_max=0))
+        self.check_ret_cc(mb.compute_max_chord(d, details=self.detailed), ret)
+        self.check_ret_cc(mb.compute_max_chord(np.array(d, dtype=int),
+                                               details=self.detailed), ret)
         # 1D array; is treated as a list of 1D points.
         d = [1, 2, 4, 5]
-        ret = dict(center=3, radius=4, n_support=2, support=[0, 3],
-                   d_max=4)
-        self.assert_subset(mb.compute_max_chord(d), ret)
-        self.assert_subset(mb.compute_max_chord(np.array(d, dtype=int)), ret)
+        ret = ([1, 5], 4, dict(center=3, radius=4, n_support=2,
+                               support=[0, 3], pts_max=[1, 5], d_max=4))
+        self.check_ret_cc(mb.compute_max_chord(d, details=self.detailed), ret)
+        self.check_ret_cc(mb.compute_max_chord(np.array(d, dtype=int),
+                                               details=self.detailed), ret)
         # 3D array; results in an exception.
         d = [[[1, 2, 3], [4, 5, 6]]]
         self.assertRaises(mb.MiniballValueError,
@@ -245,11 +247,6 @@ class TestTypes(unittest.TestCase):
                           mb.compute_max_chord, d)
         self.assertRaises(mb.MiniballValueError,
                           mb.compute_max_chord, np.array(d))
-        # All nans.
-        d = [[np.nan, np.nan], [1, np.nan], [0, np.nan]]
-        ret = dict(center=None, support=None, is_valid=False)
-        self.assert_subset(mb.compute_max_chord(d), ret)
-        self.assert_subset(mb.compute_max_chord(np.array(d)), ret)
 
 
 ################################################################################
