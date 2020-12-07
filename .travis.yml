@@ -13,10 +13,10 @@ install:
   - pip install coveralls
   - pip install Cython
 before_script:
-  - python setup.py build_ext --inplace --define CYTHON_TRACE
-  - python setup.py sdist bdist_wheel
+  - ./deploy_test.sh
 # command to run tests
 script:
-  - tox
+  - pytest
 after_success:
+  - pip uninstall -y cyminiball
   - coveralls
