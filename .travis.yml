@@ -10,9 +10,10 @@ install:
   - pip install tox-travis
   - pip install coveralls
   - pip install Cython
-  - pip install pytest>=6.0 pytest-cov
+  - pip install "pytest>=6.0" "pytest-cov"
 script:
   - ./deploy_test.sh
+  - pytest --version
   - pytest -c pyproject.toml
 after_success:
   - pip uninstall -y cyminiball
