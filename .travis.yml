@@ -1,23 +1,19 @@
 sudo: false
 language: python
 python:
-  #- "3.5"
-  - "3.6"
-  - "3.7"
-  - "3.8"
-  - "3.9"
+  - "3.6"   # EOL: 2021-12-23
+  - "3.7"   # EOL: 2023-06-27
+  - "3.8"   # EOL: 2024-10
+  - "3.9"   # EOL: TBD
   #- "pypy3"
-# command to install dependencies
 install:
   - pip install tox-travis
   - pip install coveralls
   - pip install Cython
   - pip install pytest pytest-cov
-before_script:
-  - ./deploy_test.sh
-# command to run tests
 script:
-  - pytest
+  - ./deploy_test.sh
+  - pytest -c pyproject.toml
 after_success:
   - pip uninstall -y cyminiball
   - coveralls
