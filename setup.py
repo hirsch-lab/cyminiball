@@ -36,11 +36,29 @@ from pathlib import Path
 from setuptools import setup, Extension
 
 
+# Decide whether a cythonization of the pyx-file is required.
+# Cythonization is done automatically if the generated .cpp
+# does not yet exist, if setup.py is called with positional
+# argument build_ext or if the envvar CYMINIBALL_CYTHONIZE
+# is set to 1.
+nos = (None, "0", "false")
 subcommand = sys.argv[1] if len(sys.argv) > 1 else None
 use_cython = ((subcommand == "build_ext")  # This is possibly a bit hacky.
               or not Path("src/_miniball_wrap.cpp").is_file()
-              or (os.getenv("CYMINIBALL_USE_CYTHON", None)
-                  not in (None, "0", "false")))
+              or (os.getenv("CYMINIBALL_CYTHONIZE", None) not in nos))
+# Decide whether the binaries should be built with tracing info.
+# Tracing is required for a coverage analysis of the Cython code.
+# - http://blog.behnel.de/posts/coverage-analysis-for-cython-modules.html
+# - https://medium.com/@dfdeshom/631615eb197a
+# To build a package with tracing information, build in two steps!
+#   python setup.py build_ext --inplace --define CYTHON_TRACE
+#   python python setup.py sdist bdist_wheel
+with_trace = os.getenv("CYMINIBALL_TRACE", None) not in nos
+
+if use_cython:
+    print("Package is built with cythonization.")
+if with_trace:
+    print("Package is built with line trace information.")
 
 packages = ["cyminiball"]
 package_dir = {"cyminiball": "src",
@@ -57,9 +75,11 @@ extensions = [Extension("cyminiball._wrap",
                         extra_compile_args=["-std=c++11"])]
 
 if use_cython:
+    dirs = {"linetrace": with_trace}
     try:
         from Cython.Build import cythonize
-        extensions = cythonize(extensions)
+        extensions = cythonize(extensions,
+                               compiler_directives=dirs)
     except ModuleNotFoundError:
         msg = ("A Cython build was triggered but Cython is not available.\n"
                "Make sure to install Cython: python -m pip install Cython")
