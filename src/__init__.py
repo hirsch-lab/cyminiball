@@ -8,6 +8,7 @@ __author__ = _meta("cyminiball")["author"]
 
 from ._wrap import (MiniballError,
                     MiniballTypeError,
+                    MiniballValueError,
                     compute,
                     compute_no_checks,
                     compute_max_chord,

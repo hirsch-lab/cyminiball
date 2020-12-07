@@ -1,5 +1,6 @@
 # cython: infer_types=True
 # cython: language_level=3
+import copy
 import time
 import numpy as np
 import cython
@@ -28,6 +29,8 @@ ctypedef fused float_type:
 class MiniballError(Exception):
     pass
 class MiniballTypeError(TypeError, MiniballError):
+    pass
+class MiniballValueError(ValueError, MiniballError):
     pass
 
 ################################################################################
@@ -199,9 +202,8 @@ def compute(points, details=False, tol=None):
 
         See the code documentation in [1] for further details.
     """
-    ret_default = (None, 0, None) if details else (None, 0)
     if points is None:
-        return ret_default
+        raise MiniballValueError("Argument points cannot be None.")
     elif issubclass(type(points), str):
         msg = "Expecting a 2D array but received a string."
         raise MiniballTypeError(msg)
@@ -219,24 +221,24 @@ def compute(points, details=False, tol=None):
         points = np.asarray(points, dtype=float)
     if issubclass(points.dtype.type, complex):
         msg = "Complex arrays are not supported by miniball."
-        raise MiniballTypeError(msg)
+        raise MiniballValueError(msg)
     elif points.dtype.kind != "f":
         msg = ("Invalid dtype (%s) encountered. Expecting a "
                "numeric 2D array of points.")
-        raise MiniballTypeError(msg % points.dtype)
+        raise MiniballValueError(msg % points.dtype)
     if issubclass(points.dtype.type, np.float16):
         msg = ("Invalid dtype (np.float16) encountered. Use np.float instead.")
-        raise MiniballTypeError(msg)
+        raise MiniballValueError(msg)
 
     # Check shape.
     if points.size==0:
-        return ret_default
+        raise MiniballValueError("No data to process, points is empty.")
     elif len(points.shape)<2:
         # Handle a 0D or 1D array as a list of points in 1D.
         points = np.atleast_2d(points).T
     elif len(points.shape)>2:
         msg = "Expecting a 2D array but received a %dD array (shape: %s)."
-        raise MiniballTypeError(msg % (len(points.shape), points.shape))
+        raise MiniballValueError(msg % (len(points.shape), points.shape))
     return compute_no_checks(points, details, tol)
 
 ################################################################################
@@ -264,10 +266,16 @@ def compute_max_chord(points, info=None, tol=None):
         d_max: length of the maximum chord
     """
     if points is None:
-        raise MiniballError("Argument points cannot be None")
+        raise MiniballValueError("Argument points cannot be None.")
     if info is None:
         _, _, info = compute(points=points, details=True, tol=tol)
     points = np.asarray(points)
+    if info is None:
+        return info
+    if len(points.shape)<2:
+        info["ids_max"] = copy.deepcopy(info["support"])
+        info["d_max"] = info["radius"]*2
+        return info
     support = points[info["support"]]
     pdist = np.linalg.norm(support[:,None,:] - support[None,:,:], axis=-1)
     ids_max = list(np.unravel_index(np.argmax(pdist, axis=None), pdist.shape))
