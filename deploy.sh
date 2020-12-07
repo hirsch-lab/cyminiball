@@ -7,6 +7,7 @@ rm -f src/_miniball_wrap.cpp
 rm -rf build
 rm -rf dist
 pip uninstall -y cyminiball
+pip cache remove cyminiball
 
 # Build
 export CYMINIBALL_TRACE="0"
