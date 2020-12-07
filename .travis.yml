@@ -12,6 +12,7 @@ install:
   - pip install tox-travis
   - pip install coveralls
   - pip install Cython
+  - pip install pytest pytest-cov
 before_script:
   - ./deploy_test.sh
 # command to run tests
