@@ -73,8 +73,7 @@ To build the package requires
 ```bash
 git clone https://github.com/hirsch-lab/cyminiball.git
 cd cyminiball
-python setup.py build_ext --inplace
-python setup.py sdist bdist_wheel
-python test/test_all.py
+./build_install.sh
+python tests/test_all.py
 python examples/examples.py
 ```
