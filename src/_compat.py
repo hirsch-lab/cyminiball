@@ -31,4 +31,3 @@ class Miniball:
 
     def get_time(self):
         return self._info["elapsed"]
-

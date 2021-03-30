@@ -1,9 +1,3 @@
-import timeit
-import numpy as np
-import miniball     # miniballcpp or miniball
-import cyminiball
-import matplotlib.pyplot as plt
-
 """
 Compare different implementations of miniball:
 
@@ -14,6 +8,13 @@ Compare different implementations of miniball:
 Since miniball and miniballcpp have the same package name (miniball), they
 cannot be used side by side. The former is very slow, hence it is excluded here.
 """
+
+import timeit
+import numpy as np
+import miniball     # miniballcpp or miniball
+import cyminiball
+import matplotlib.pyplot as plt
+
 
 ################################################################################
 def create_data(n, d, dt):
