@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 ################################################################################
 def generate_data(n=50):
     d = 2           # Number of dimensions
-    dt = np.float   # Different data types are supported
+    dt = np.float64 # Different data types are supported
     rs = np.random.RandomState(42)
     points = rs.randn(n, d)
     points = points.astype(dt)

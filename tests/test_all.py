@@ -9,7 +9,7 @@ class TestTypes(unittest.TestCase):
                     np.float64:    np.float64,
                     np.float128:   np.float128,
                     # np.float16:  float, # not available
-                    np.float:      float
+                    # np.float:    float  # deprecated
                     }
 
     valid_itypes = {int:           float,
@@ -25,7 +25,7 @@ class TestTypes(unittest.TestCase):
                     # np.bool8:    float, # supported, but not tested.
                     # np.bool:     float  # supported, but not tested.
                     }
-    invalid_dtypes = [str, np.str, np.complex, np.complex64,
+    invalid_dtypes = [str, complex, np.complex64,
                       np.complex128, np.complex256, np.float16]
     iterables = [list, tuple, set]
     detailed = False
