@@ -300,6 +300,9 @@ class TestRandom(unittest.TestCase):
                             self.assertLessEqual(info["d_max"], upper)
 
     def test_get_bounding_ball(self):
+        """
+        See miniball._compat.get_bounding_ball()
+        """
         for dt in self.dtypes:
             with self.subTest(dt=dt):
                 data = self.rs.normal(0, 1, (100, 5))
@@ -308,6 +311,24 @@ class TestRandom(unittest.TestCase):
                 C_B, r2_B = mb.get_bounding_ball(data)
                 np.testing.assert_array_equal(C_A, C_B)
                 self.assertEqual(r2_A, r2_B)
+
+    def test_miniballcpp_interface(self):
+        """
+        See miniball._compat.Miniball()
+        """
+        for dt in self.dtypes:
+            with self.subTest(dt=dt):
+                data = self.rs.normal(0, 1, (100, 5))
+                data = data.astype(dt)
+                C_A, r2_A, info = mb.compute(data, details=True)
+                M = mb.Miniball(data)
+                C_B = M.center()
+                r2_B = M.squared_radius()
+                np.testing.assert_array_equal(C_A, C_B)
+                self.assertEqual(r2_A, r2_B)
+                self.assertEqual(info["relative_error"], M.relative_error())
+                self.assertEqual(info["is_valid"], M.is_valid())
+                np.testing.assert_almost_equal(info["elapsed"], M.get_time(), 3)
 
 
 ################################################################################
