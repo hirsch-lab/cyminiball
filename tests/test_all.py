@@ -65,7 +65,8 @@ class TestTypes(unittest.TestCase):
         dict_ret = {k: v for k, v in dict_ref.items() if k in dict_ret}
         self.assertEqual(dict_ret, dict_ref)
 
-    def convert_data(self, data, dtype):
+    @staticmethod
+    def convert_data(data, dtype):
         return [list(map(dtype, elm)) for elm in data]
 
     def test_numpy_types(self):

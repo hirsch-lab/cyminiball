@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 
 ################################################################################
 def generate_data(n=50):
-    d = 2           # Number of dimensions
-    dt = np.float64 # Different data types are supported
+    d = 2               # Number of dimensions
+    dt = np.float64     # Different data types are supported
     rs = np.random.RandomState(42)
     points = rs.randn(n, d)
     points = points.astype(dt)
@@ -101,6 +101,7 @@ def example_animated():
     anim = FuncAnimation(fig, update, frames=xrange, interval=30,
                          init_func=init, blit=True)
     return anim
+
 
 ################################################################################
 def benchmark_with_details():

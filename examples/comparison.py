@@ -39,11 +39,11 @@ def measure_performance(d=2, dt=np.float64, n_steps=10):
     t2 = np.zeros(len(ns))
     statement1 = "cyminiball.compute(points)"
     statement2 = "miniball.Miniball(points)"
-    #statement2 = "miniball.get_bounding_ball(points)"
+    # statement2 = "miniball.get_bounding_ball(points)"
 
     print("Running...")
 
-    for i,n in enumerate(ns):
+    for i, n in enumerate(ns):
         points = create_data(n=n, d=d, dt=dt)
         context = dict(miniball=miniball, cyminiball=cyminiball, points=points)
         delta1, n_reps1 = run_timer(statement=statement1, context=context)
@@ -56,14 +56,15 @@ def measure_performance(d=2, dt=np.float64, n_steps=10):
     ratio = t2/t1
     print("Done!")
     print()
-    print("ratio:  %.2f ± %.2f" % (ratio.mean(), ratio.std()))
+    print("ratio:  %.2f ± %.2f" % (ratio.mean(axis=None),
+                                   ratio.std(axis=None)))
     print("ratios: %s" % ", ".join(map(str, ratio.round(1))))
     return ns, t1, t2
 
 
 ################################################################################
 def plot_results(ns, t1, t2, d, dt):
-    fig, ax = plt.subplots()
+    _, ax = plt.subplots()
     ax.plot(ns, t1*1000, "-o", label="cyminiball")
     ax.plot(ns, t2*1000, "-x", label="miniball")
     ax.set_xlabel("Number of points")
