@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 ################################################################################
 def generate_data(n=50):
     d = 2           # Number of dimensions
-    dt = np.float   # Different data types are supported
+    dt = np.float64 # Different data types are supported
     rs = np.random.RandomState(42)
     points = rs.randn(n, d)
     points = points.astype(dt)
@@ -95,10 +95,12 @@ def example_animated():
                         [points[-1, 1], points[-1, 1]]])
         return circle, center, line, point
 
+    # Info: Blitting seems not to work with OSX backend.
+    #       (Check the backend that is set in .matplotlibrc)
     from matplotlib.animation import FuncAnimation
-    FuncAnimation(fig, update, frames=xrange, interval=30,
-                  init_func=init, blit=True)
-
+    anim = FuncAnimation(fig, update, frames=xrange, interval=30,
+                         init_func=init, blit=True)
+    return anim
 
 ################################################################################
 def benchmark_with_details():
@@ -135,5 +137,5 @@ def benchmark_with_details():
 ################################################################################
 if __name__ == "__main__":
     example_basic()
-    example_animated()
+    anim = example_animated()
     plt.show()

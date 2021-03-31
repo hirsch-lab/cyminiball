@@ -246,15 +246,6 @@ def compute(points, details=False, tol=None):
 
 
 ################################################################################
-def get_bounding_ball(points):
-    """An alias for miniball.compute() with the purpose to make the
-    cyminiball package a drop-in replacement for another miniball project
-    available on PyPi: https://pypi.org/project/miniball/
-    """
-    return compute(points, details=False, tol=None)
-
-
-################################################################################
 def compute_max_chord(points, info=None, details=False, tol=None):
     """Compute the longest chord between the support points of the miniball.
     If info is None, compute(points, details=True) will be called internally:

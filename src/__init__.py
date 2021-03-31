@@ -11,5 +11,8 @@ from ._wrap import (MiniballError,
                     MiniballValueError,
                     compute,
                     compute_no_checks,
-                    compute_max_chord,
-                    get_bounding_ball)
+                    compute_max_chord)
+
+# To mimic the interface of other miniball projects
+from ._compat import (get_bounding_ball,
+                      Miniball)

@@ -12,7 +12,7 @@ install:
   - pip install Cython
   - pip install "pytest>=6.0" "pytest-cov"
 script:
-  - ./deploy_test.sh
+  - ./build_install_test.sh
   - pytest --version
   - pytest -c pyproject.toml
 after_success:
