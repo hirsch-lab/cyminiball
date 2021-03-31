@@ -18,3 +18,4 @@
 - Miscellaneous: Add reference to project `miniballcpp`
 - Miscellaneous: Add examples/comparison.py
 - Fix: Deprecation warnings
+- Fix: Animated example for matplotlib>=3.3
