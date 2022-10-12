@@ -7,7 +7,8 @@ class TestTypes(unittest.TestCase):
     valid_ftypes = {float:         float,
                     np.float32:    np.float32,
                     np.float64:    np.float64,
-                    np.float128:   np.float128,
+                    np.longdouble: np.longdouble
+                    # np.float128: np.float128, # not available
                     # np.float16:  float, # not available
                     # np.float:    float  # deprecated
                     }
@@ -26,7 +27,7 @@ class TestTypes(unittest.TestCase):
                     # np.bool:     float  # supported, but not tested.
                     }
     invalid_dtypes = [str, complex, np.complex64,
-                      np.complex128, np.complex256, np.float16]
+                      np.complex128, np.float16]
     iterables = [list, tuple, set]
     detailed = False
 
@@ -265,7 +266,7 @@ class TestTypesDetailed(TestTypes):
 
 ################################################################################
 class TestRandom(unittest.TestCase):
-    dtypes = [np.float32, np.float64, np.float128]
+    dtypes = [np.float32, np.float64, np.longdouble]
     n_points = [1, 2, 3, 4, 10, 10000]
     n_dims = [0, 1, 2, 3, 4]
     n_reps = 10
