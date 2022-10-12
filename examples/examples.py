@@ -80,10 +80,9 @@ def example_animated():
     visualize_data(ax, points[:-1], lim=7)
     _, _, info = mb.compute(points, details=True)
     center, line, circle = visualize_circle(ax, info, points, animated=True)
-    # circle = circle       # Circle artist
-    center = center[0]      # Line2D artist
-    line = line[0]          # Line2D artist
-    point = ax.plot(0, 0, 'gx-', animated=True)[0]  # line2D artist
+    center = center[0]
+    line = line[0]
+    point = ax.plot(0, 0, 'gx-', animated=True)[0]
     ax.legend((center, line, point),
               ("bounding circle", "support", "moving point"))
 
