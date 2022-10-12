@@ -9,12 +9,26 @@ Since miniball and miniballcpp have the same package name (miniball), they
 cannot be used side by side. The former is very slow, hence it is excluded here.
 """
 
+import sys
 import timeit
 import numpy as np
-import miniball     # miniballcpp or miniball
 import cyminiball
 import matplotlib.pyplot as plt
 
+try:
+    import miniball     # miniballcpp or miniball
+except ModuleNotFoundError as ex:
+    print("Error:", ex)
+    print()
+    print("The script comparison.py compares the package cyminiball with\n"
+          "other miniball implementations: either miniball or miniballcpp.\n"
+          "Install those packages via pip.\n\n"
+          "    python -m pip install miniball\n"
+          "    python -m pip install miniballcpp\n\n"
+          "Note: Since miniball and miniballcpp have the same package name\n"
+          "(miniball), they cannot be used side by side. The former is very\n"
+          "slow, hence prefer miniballcpp over miniball.")
+    sys.exit(-1)
 
 ################################################################################
 def create_data(n, d, dt):
