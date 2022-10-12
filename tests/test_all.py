@@ -53,7 +53,7 @@ class TestTypes(unittest.TestCase):
                 self.assertIsNone(info)
 
     def check_ret_cc(self, ret, ref):
-        # Handles also nans.
+        # Handles also NaNs.
         # self.assertEqual(ret[:2], ref[:2])
         np.testing.assert_equal(ret[:2], ref[:2])
         if self.detailed:
