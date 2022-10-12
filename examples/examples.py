@@ -25,17 +25,26 @@ def visualize_data(ax, points, lim=5):
 
 
 ################################################################################
-def visualize_circle(ax, info, points):
+def visualize_circle(ax, info, points, animated=False):
+    """
+    Purpose of argument animated: remove first frame
+    https://stackoverflow.com/questions/21439489
+    """
     radius = info["radius"]
     center = info["center"]
-    hp = ax.plot(center[0], center[1], "ob-")
+    hp = ax.plot(center[0], center[1], "ob-",
+                 animated=animated, visible=True)
     hl = ax.plot(points[info["support"], 0],
-                 points[info["support"], 1], "ro-")
-    hc = plt.Circle(center, radius, fill=False, color="blue")
+                 points[info["support"], 1], "ro-",
+                 animated=animated, visible=True)
+    hc = plt.Circle(center, radius, fill=False, color="blue",
+                    animated=animated, visible=True)
+    hc.set_visible(False)
     ax.add_artist(hc)
     if "ids_max" in info:
         ax.plot(points[info["ids_max"], 0],
-                points[info["ids_max"], 1], "mo-")
+                points[info["ids_max"], 1], "mo-",
+                animated=animated, visible=True)
     return hp, hl, hc
 
 
@@ -70,15 +79,16 @@ def example_animated():
     fig, ax = plt.subplots()
     visualize_data(ax, points[:-1], lim=7)
     _, _, info = mb.compute(points, details=True)
-    center, line, circle = visualize_circle(ax, info, points)
+    center, line, circle = visualize_circle(ax, info, points, animated=True)
     # circle = circle       # Circle artist
     center = center[0]      # Line2D artist
     line = line[0]          # Line2D artist
-    point = ax.plot(0, 0, 'gx-')[0]  # line2D artist
+    point = ax.plot(0, 0, 'gx-', animated=True)[0]  # line2D artist
     ax.legend((center, line, point),
               ("bounding circle", "support", "moving point"))
 
     def init():
+        circle.set_visible(False)
         return circle, center, line, point
 
     def update(x):
@@ -89,6 +99,7 @@ def example_animated():
         # Update artists.
         circle.center = C
         circle.radius = np.sqrt(r2)
+        circle.set_visible(True)
         center.set_data(C)
         line.set_data(points[info["support"], :].T)
         point.set_data([[xrange[0], points[-1, 0]],
