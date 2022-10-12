@@ -17,7 +17,7 @@ A Python package to compute the smallest bounding ball of a point cloud in arbit
 To my knowledge, this is currently the fastest implementation available in Python. For other implementations see:
 
 - [`miniballcpp`](https://pypi.org/project/MiniballCpp/) Python binding of the same C++ source ([miniball](https://people.inf.ethz.ch/gaertner/subdir/software/miniball.html))
-- [`miniball`](https://pypi.org/project/miniball/) Pure Python implementation (slow)   
+- [`miniball`](https://pypi.org/project/miniball/) Pure Python implementation (slow)
 
 ## Installation:
 
@@ -91,10 +91,10 @@ python "tests/test_all.py"
 python "examples/examples.py"
 ```
 
-## Performance
+## Performance
 
-For a comparison with [`miniballcpp`](https://pypi.org/project/MiniballCpp/), run the below command. In my experiments, the Cython-optimized code ran 10-50 times faster, depending on the number of points and point dimensions. 
+For a comparison with [`miniballcpp`](https://pypi.org/project/MiniballCpp/), run the below command. In my experiments, the Cython-optimized code ran 10-50 times faster, depending on the number of points and point dimensions.
 
-```bash 
+```bash
 python "examples/comparison.py"
 ```
