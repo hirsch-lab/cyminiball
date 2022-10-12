@@ -30,6 +30,7 @@ except ModuleNotFoundError as ex:
           "slow, hence prefer miniballcpp over miniball.")
     sys.exit(-1)
 
+
 ################################################################################
 def create_data(n, d, dt):
     points = np.random.randn(n, d)
