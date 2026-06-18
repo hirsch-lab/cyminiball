@@ -11,11 +11,20 @@
 - Fix: Issue #1 Performance problem related to `compute(..., details=True)`
 - Fix: Issue #2 (suppress unnecessary runtime errors)
 
-
 ## v2.1.0 (31.03.2021)
+
 - Enhancement: Update documenation
 - Enhancement: Add requirements.txt
 - Miscellaneous: Add reference to project `miniballcpp`
 - Miscellaneous: Add examples/comparison.py
 - Fix: Deprecation warnings
 - Fix: Animated example for matplotlib>=3.3
+
+## v2.2.0 (18.06.2026)
+
+- Changed: Modernized packaging (`pyproject.toml`)
+- Changed: Added support for newer Python versions
+- Fix: Resolved compatibility issues with updated packaging dependencies
+- Fix: Resolved a license ambiguity
+- Enhancement: Improved documentation
+

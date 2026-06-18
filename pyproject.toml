@@ -1,11 +1,52 @@
+[project]
+name = "cyminiball"
+dynamic = ["version"]
+description = "Compute the smallest bounding ball of a point cloud. Cython binding of the popular miniball utility. Fast!"
+readme = { file = "README.md", content-type = "text/markdown" }
+authors = [
+    { name = "Norman Juchler" }
+]
+license = "GPL-3.0-only"
+license-files = ["LICENSE"]
+requires-python = ">=3.8"
+dependencies = [
+    "numpy>=1.0"
+]
+keywords = ["miniball", "geometry", "fast"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Utilities",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+]
+
 [build-system]
-# Cython dependency is optional, see setup.py for details.
-# For the package (run-time) dependencies, see setup.cfg.
-requires = ["setuptools", "wheel", "numpy"]
+requires = [
+    "setuptools>=64",
+    "wheel",
+    "numpy",
+    "cython"
+]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+packages = ["cyminiball"]
+package-dir = { cyminiball = "src" }
 
-# pyproject.toml
+# [tool.setuptools.packages.find]
+# where = ["src"]
+# exclude = ["cyminiball.miniball*"]
+
+[tool.setuptools.package-data]
+cyminiball = ["miniball/*"]
+
+[tool.setuptools.dynamic]
+version = { file = ["VERSION.in"] }
+
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = [

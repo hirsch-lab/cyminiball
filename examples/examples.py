@@ -99,7 +99,7 @@ def example_animated():
         circle.center = C
         circle.radius = np.sqrt(r2)
         circle.set_visible(True)
-        center.set_data(C)
+        center.set_data([C[0]], [C[1]])
         line.set_data(points[info["support"], :].T)
         point.set_data([[xrange[0], points[-1, 0]],
                         [points[-1, 1], points[-1, 1]]])

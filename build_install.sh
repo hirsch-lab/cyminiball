@@ -1,21 +1,28 @@
 #!/usr/bin/env bash
-# Build and deploy the package without tracing information.
+# Build and install the package (no tracing information)
 
-# Clean
-rm -rf cyminiball.egg-info
+set -euo pipefail
+
+echo "==> Cleaning previous build artifacts"
+rm -rf build dist *.egg-info
 rm -f src/_miniball_wrap.cpp
-rm -rf build
-rm -rf dist
-pip uninstall -y cyminiball
-pip cache remove cyminiball
 
-# Build
+# Optional cleanup (ignore if not installed / not cached)
+python -m pip uninstall -y cyminiball || true
+python -m pip cache remove cyminiball || true
+
+echo "==> Preparing build environment"
+python -m pip install --quiet --upgrade pip build
+
+echo "==> Building package"
 export CYMINIBALL_TRACE="0"
-python setup.py sdist bdist_wheel
+python -m build
 
-# Install
-mv cyminiball.egg-info build
-pip install dist/cyminiball-*.whl
+echo "==> Installing wheel"
+# Ensure only one wheel is selected
+WHEEL=$(ls dist/cyminiball-*.whl | head -n 1)
+mkdir build
+[ -d cyminiball.egg-info ] && mv cyminiball.egg-info build
+python -m pip install "$WHEEL"
 
-# Run the tests. (Reads the configs from tox.ini)
-# pytest
+echo "==> Done"
